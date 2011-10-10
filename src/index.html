@@ -1,0 +1,99 @@
+<html>
+<head>
+	<script src='js/jquery.js'></script>
+	<script src='js/jquery-ui.js'></script>
+	<script src='js/bootstrap-tabs.js'></script>
+	<script src='js/strophe.js'></script>
+	<script src='js/pubsubbox.js'></script>
+	<link rel='stylesheet' href='css/bootstrap.css'>
+	<link rel='stylesheet' href='css/pubsubbox.css'>
+</head>
+<body>
+
+<div class="container">
+
+<div id="login-screen">
+<div class="row">	
+	<div class="span10">
+		<br><br><br><br><br><br>
+		<h1 class="left">pubsub in a box</h1>
+		<br><br><br>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae odio lorem, ut scelerisque mi. Fusce velit magna, dignissim sed commodo non, facilisis in elit. Sed porta sem et odio iaculis iaculis. Aenean aliquam dui ac felis molestie cursus. Fusce ac ligula non quam lacinia tincidunt. Cras ut nisl at ante euismod euismod dignissim dapibus felis. Nunc consectetur lectus id est varius scelerisque. Morbi purus neque, eleifend vel iaculis aliquet, fermentum vitae dui. Nulla in ipsum nisi. Fusce sed nisi et nisi dictum feugiat.</p>
+		<br>
+	</div>
+</div>
+
+<div class="row">	
+	<div class="span3">
+		<button id="connect-button" class="btn success large">Get started!</button>
+	</div>
+	<div class="span7">
+		<div id="login-form" class="hidden">
+			<form>
+				<label for="xlInput">Username</label>
+            			<div class="input">
+              				<input class="xlarge" id="jid" size="30" type="text" />
+            			</div>
+				<br>
+            			<label for="xlInput">Password</label>
+            			<div class="input">
+              				<input class="xlarge" id="password" size="30" type="password" />
+            			</div>
+			</form>
+              		<button id="login-button" style="margin-left:150px;" class="btn primary">Login</button>
+              		<button class="btn">Cancel</button>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="main-screen" class="hidden">
+<div class="row">	
+	<div class="span16">
+		<br><br><br>
+		<canvas class="left" id='avatar' width='80' height='80'></canvas>
+		<h1 class="left" id="fullname"></h1><span class="label success right hidden" id="label-online" style="margin-left:5px;margin-top:7px;">Online</span>
+		<br><br><br>
+		<button class="btn info" id="send-info">Profile</button>
+		<button class="btn success">+ Contact</button>
+		<button class="btn success">+ PubSub Node</button>
+		<a href="." class="btn danger">Logout</a>
+		<br><br>
+		<ul class="tabs">
+			<li class="active"><a href="#">Manage</a></li>
+			<li><a href="#">Discover</a></li>
+			<li><a href="#">Activities</a></li>
+		</ul>
+	</div>
+</div>
+	<div class="row">
+		<div class="span16">
+			<div id="roster">
+			</div>
+		</div>
+	</div>
+	<br>
+	<hr>
+	<div class="row">
+		<div class="span16">
+			<div id="pubsub">
+				<h6>PubSub Nodes<h6>
+				<br>
+			</div>
+		</div>
+	</div>
+	<br>
+	<hr>
+	<div class="row">
+		<div class="span7 right">
+			<div id="log"></div>
+		</div>
+
+	</div>
+</div>
+
+</div>
+
+
+</body>
+</html>
