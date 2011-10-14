@@ -1,1 +1,0 @@
-strophe-1.0.2.min.js

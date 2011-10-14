@@ -1,1 +1,0 @@
-bootstrap-tabs-1.3.0.js
