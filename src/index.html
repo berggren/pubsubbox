@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <!--
 /*
 Copyright 2011 NORDUnet A/S. All rights reserved.
@@ -17,7 +18,7 @@ WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABI
 FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NORDUNET A/S OR
 CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HObEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -36,8 +37,8 @@ or implied, of NORDUnet A/S.
     <script src='js/bootstrap-modal-1.3.0.js'></script>
 	<script src='js/strophe-1.0.2.min.js'></script>
 	<script src='js/pubsubbox.js'></script>
-	<link rel='stylesheet' href='css/bootstrap.css'>
-	<link rel='stylesheet' href='css/pubsubbox.css'>
+	<link rel='stylesheet' href='css/bootstrap-1.3.0.min.css'>
+    <link rel='stylesheet' href='css/pubsubbox.css'>
 </head>
 <body>
 
@@ -63,24 +64,23 @@ or implied, of NORDUnet A/S.
 		<div id="login-form" class="hidden">
 			<form>
 				<label for="xlInput">Username</label>
-            			<div class="input">
-              				<input class="xlarge" id="jid" size="30" type="text" />
-            			</div>
+            	<div class="input">
+              		<input id="jid" size="30" type="text" />
+            	</div>
 				<br>
-            			<label for="xlInput">Password</label>
-            			<div class="input">
-              				<input class="xlarge" id="password" size="30" type="password" />
-            			</div>
+            	<label for="xlInput">Password</label>
+            	<div class="input">
+              	    <input id="password" size="30" style="font-size: 2em;" type="password" />
+            	</div>
 			</form>
-              		<button id="login-button" style="margin-left:150px;" class="btn primary">Login</button>
-              		<button class="btn">Cancel</button>
+            <button value="Login" id="login-button" style="margin-left:150px;" class="btn primary">Login</button>
 		</div>
 	</div>
 </div>
 </div>
 
 <div id="main-screen" class="hidden">
-<div class="row">	
+<div class="row">
 	<div class="span16">
 		<br><br><br>
 		<canvas class="left" id='avatar' width='80' height='80'></canvas>
@@ -108,10 +108,8 @@ or implied, of NORDUnet A/S.
 	<hr>
 	<div class="row">
 		<div class="span16">
-			<div id="pubsub">
-				<h6>PubSub Nodes<h6>
-				<br>
-			</div>
+            <h6>PubSub Nodes</h6>
+			<div id="pubsub"></div>
 		</div>
 	</div>
 	<br>
@@ -132,9 +130,9 @@ or implied, of NORDUnet A/S.
     <div class="modal-body">
         <form>
             <label for="xlInput">Name</label>
-                    <div class="input">
-                          <input class="xlarge" id="create-node-name" size="30" type="text" />
-                    </div>
+            <div class="input">
+                <input class="xlarge" id="node" size="30" type="text" />
+            </div>
         </form>
     </div>
     <div class="modal-footer">

@@ -32,7 +32,7 @@ var XMPP = {
      */
 	connection: null,
 	my_jid: null,
-    
+
 	log: function(msg) {
 		$('#log').prepend('<p class="log">' + msg + '</p>')
 	},
@@ -109,7 +109,7 @@ var XMPP = {
 	on_pubsub_item: function(iq) {
 		$(iq).find('item').each(function() {
 			if ($(this).attr('node') != "/home") {
-				$('#pubsub').append('<div class="well drop left" style="margin-left:5px;"><strong>' + $(this).attr('node') + '</strong><br><br></div>');
+				$('#pubsub').append('<div class="well2 drop left" style="margin-left:5px;"><strong>' + $(this).attr('node') + '</strong><br><br></div>');
 			}
 		});
 		$(".drop").droppable({
@@ -120,16 +120,20 @@ var XMPP = {
 	},
 
 	on_error: function(iq) {
-		alert(error);
+		alert("error");
 	},
 
     on_create_node: function(iq) {
-          
     }
 };
 
 $(document).bind('connect', function(ev, data) {
 	var conn = new Strophe.Connection("/http-bind");
+
+    conn.xmlOutput = function (body) {
+        console.log(body);
+    };
+
 	XMPP.my_jid = data.jid;
 	conn.connect(data.jid, data.password, function(status) {
         	if (status === Strophe.Status.CONNECTED) {
@@ -150,6 +154,7 @@ $(document).bind('connected', function () {
 	XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
 	XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
 	XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
+
 });
 
 $(document).bind('disconnected', function () {
@@ -162,9 +167,32 @@ $(document).bind('drop', function(event, ui) {
 	XMPP.log("dropped");
 });
 
-$(document).bind('create_node', function() {
-    var createNodeIQ = $iq({type: 'set', to: "pubsub.red.local"}).c('query', {xmlns: 'http://jabber.org/protocol/pubsub'});
-    alert(createNodeIQ)
+$(document).bind('create_node_with_config', function(event, data) {
+    var iq = $iq({to:'pubsub.red.local', type:'set'})
+        .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+        .c('create', {node:data.node})
+        .up()
+        .c('configure')
+        .c('x', {xmlns: 'jabber:x:data', type: "submit"})
+        .c('field', {"var": "FORM_TYPE", type: "hidden"})
+        .c('value').t('http://jabber.org/protocol/pubsub#node_config')
+        .up().up()
+        .c('field', {"var": 'pubsub#access_model'})
+        .c('value').t("whitelist");
+    XMPP.connection.sendIQ(iq, XMPP.on_create_node);
+})
+
+$(document).bind('create_node', function(event, data) {
+    var iq = $iq({to:'pubsub.red.local', type:'set'});
+    iq.c('pubsub', {xmlns:'http://jabber.org/protocol/pubsub'}).c('create', {node:data.node});
+    $("#pubsub").prepend('<div class="well2 drop left" style="margin-left:5px;"><strong>' + data.node + '</strong><br><br></div>')
+    XMPP.connection.sendIQ(iq, XMPP.on_create_node);
+    $(".drop").droppable({
+        drop: function(event, ui) {
+                   $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
+        }
+    })
+
 })
 
 $(document).ready(function() {
@@ -181,7 +209,10 @@ $(document).ready(function() {
 	});
 
     $('#create-node-button').click(function () {
-        $(document).trigger('create_node');
+        $("#my-modal").modal('hide');
+        $(document).trigger('create_node_with_config', {
+        		node: $('#node').val()
+		});
     });
 
 });
