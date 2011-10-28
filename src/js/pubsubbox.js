@@ -119,6 +119,20 @@ var XMPP = {
        		})
 	},
 
+    on_affiliation: function(iq) {
+        $(iq).find('affiliation').each(function() {
+            if ($(this).attr('affiliation') === "owner") {
+                $('#pubsub').append('<div class="well2 drop left" style="margin-left:5px;"><strong>' + $(this).attr('node') + '</strong><br><br></div>');
+            }
+        });
+        $(".drop").droppable({
+            drop: function(event, ui) {
+                       $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
+                 }
+               })
+    },
+
+
 	on_error: function(iq) {
 		alert("error");
 	},
@@ -146,15 +160,21 @@ $(document).bind('connect', function(ev, data) {
 });
 
 $(document).bind('connected', function () {
-	$('#main-screen').toggle("fast");
+    $('#main-screen').toggle("fast");
 	$('#label-online').toggle("fast");
-	var rosterIQ = $iq({type: 'get'}).c('query', {xmlns: 'jabber:iq:roster'});
-    var pubSubIQ = $iq({to: 'pubsub.red.local', type: 'get'}).c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
-    var vCardIQ = $iq({type: 'get'}).c('query', {xmlns: 'vcard-temp'});
+	var rosterIQ = $iq({type: 'get'})
+        .c('query', {xmlns: 'jabber:iq:roster'});
+    var pubSubIQ = $iq({to: 'pubsub.red.local', type: 'get'})
+        .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
+    var affiliationIQ = $iq({to: 'pubsub.red.local', type: 'get'})
+        .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+        .c('affiliations');
+    var vCardIQ = $iq({type: 'get'})
+        .c('query', {xmlns: 'vcard-temp'});
 	XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
-	XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
+	//XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
+    XMPP.connection.sendIQ(affiliationIQ, XMPP.on_affiliation, XMPP.on_error);
 	XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
-
 });
 
 $(document).bind('disconnected', function () {
@@ -168,7 +188,7 @@ $(document).bind('drop', function(event, ui) {
 });
 
 $(document).bind('create_node_with_config', function(event, data) {
-    var iq = $iq({to:'pubsub.red.local', type:'set'})
+    var iq = $iq({to:'jbn@red.local', type:'set'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
         .c('create', {node:data.node})
         .up()
