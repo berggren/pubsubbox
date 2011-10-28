@@ -33,6 +33,8 @@ var XMPP = {
 	connection: null,
 	my_jid: null,
 
+    nodes: {},
+
 	log: function(msg) {
 		$('#log').prepend('<p class="log">' + msg + '</p>')
 	},
@@ -119,17 +121,26 @@ var XMPP = {
        		})
 	},
 
+    on_pubsub_item2: function(iq) {
+        $(iq).find('item').each(function() {
+            if ($(this).attr('node') != "/home") {
+                XMPP.nodes[$(this).attr('node')] = $(this).attr('name');
+            }
+        });
+        var affiliationIQ = $iq({to: 'pubsub.red.local', type: 'get'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+            .c('affiliations');
+        XMPP.connection.sendIQ(affiliationIQ, XMPP.on_affiliation, XMPP.on_error);
+    },
+
     on_affiliation: function(iq) {
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') === "owner") {
-                $('#pubsub').append('<div class="well2 drop left" style="margin-left:5px;"><strong>' + $(this).attr('node') + '</strong><br><br></div>');
+                if (XMPP.nodes[$(this).attr('node')]) {
+                    $('#pubsub').append('<div class="well2 drop left" style="margin-left:5px;"><strong>' + XMPP.nodes[$(this).attr('node')] + '</strong><br><br></div>');
+                }
             }
         });
-        $(".drop").droppable({
-            drop: function(event, ui) {
-                       $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
-                 }
-               })
     },
 
 
@@ -144,7 +155,7 @@ var XMPP = {
 $(document).bind('connect', function(ev, data) {
 	var conn = new Strophe.Connection("/http-bind");
 
-    conn.xmlOutput = function (body) {
+    conn.xmlInput = function (body) {
         console.log(body);
     };
 
@@ -172,8 +183,8 @@ $(document).bind('connected', function () {
     var vCardIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'vcard-temp'});
 	XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
-	//XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
-    XMPP.connection.sendIQ(affiliationIQ, XMPP.on_affiliation, XMPP.on_error);
+	XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item2, XMPP.on_error);
+    //XMPP.connection.sendIQ(affiliationIQ, XMPP.on_affiliation, XMPP.on_error);
 	XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
 });
 
@@ -190,7 +201,7 @@ $(document).bind('drop', function(event, ui) {
 $(document).bind('create_node_with_config', function(event, data) {
     var iq = $iq({to:'jbn@red.local', type:'set'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
-        .c('create', {node:data.node})
+        .c('create')
         .up()
         .c('configure')
         .c('x', {xmlns: 'jabber:x:data', type: "submit"})
@@ -198,7 +209,10 @@ $(document).bind('create_node_with_config', function(event, data) {
         .c('value').t('http://jabber.org/protocol/pubsub#node_config')
         .up().up()
         .c('field', {"var": 'pubsub#access_model'})
-        .c('value').t("whitelist");
+        .c('value').t("whitelist")
+        .up().up()
+        .c('field', {"var": 'pubsub#title'})
+        .c('value').t(data.node);
     XMPP.connection.sendIQ(iq, XMPP.on_create_node);
 })
 
