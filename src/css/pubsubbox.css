@@ -24,11 +24,11 @@
     width: 130px;
     height: 50px;
     background-color: whiteSmoke;
-    background-color: #f6f6f6;
+    background-color: #f1f1f1;
     margin-bottom: 10px;
     padding: 5px;
     min-height: 20px;
-    border: 1px solid #EEE;
+    border: 1px solid #e3e3e3;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
@@ -44,4 +44,14 @@
 div.scroll {
     height: 150px;
     overflow: auto;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width:100px;
+}
+
+.vcenter {
+    margin-top: 30%;
 }
