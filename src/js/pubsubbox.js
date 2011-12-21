@@ -1,3 +1,6 @@
+
+
+
 /*
 Copyright 2011 NORDUnet A/S. All rights reserved.
 
@@ -30,7 +33,7 @@ var XMPP = {
     connection: null,
     my_jid: null,
     nodes: {},
-    PUBSUBSERVICE: 'pubsub.snakedesert.se',
+    PUBSUBSERVICE: 'pubsub.example.com',
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -157,6 +160,7 @@ var XMPP = {
                             var jid = ui.draggable.attr('jid');
                             var nodeID = $(this).attr('id');
                             XMPP.on_add_to_whitelist(nodeID, jid);
+                            $(document).trigger('node_update_subscriber_count', {id: nodeID});
                         }
                     });
                 }
@@ -166,10 +170,8 @@ var XMPP = {
 
     on_node_affiliation: function(iq) {
         $("#spinner").hide();
-        var subscribers = 0;
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') != 'owner') {
-                subscribers =  subscribers + 1;
                 var jid = $(this).attr('jid');
                 var id = XMPP.jid_to_id(jid);
                 var name = jid;
@@ -177,26 +179,23 @@ var XMPP = {
                 var splitName = name.split(" ");
                 var name1 = splitName[0] || '';
                 var name2 = splitName[1] || '';
-                $('#nodeinfo_whitelist').append('<div class="drag box2 left" id="' + id + '">' +
-                                        '<span class="' + id + '-canvas"' + '></span>' +
-                                        '<span>' + name1 + '<br>' + name2 + '</span>' +
-                                        '<a class="delete" id="remove_from_whitelist" href="#">X</a>' + '</div>');
+                var elem = $('<div class="drag box2 left" id="' + id + '">' +
+                    '<span class="' + id + '-canvas"' + '></span>' +
+                    '<span>' + name1 + '<br>' + name2 + '</span>' +
+                    '<a class="delete hidden" id="remove_from_whitelist" href="#">X</a>' + '</div>')
+                $('#nodeinfo_whitelist').append(elem);
+                $(elem).mouseenter(function() {
+                    $(elem).find('#remove_from_whitelist').show()
+                });
+                $(elem).mouseleave(function() {
+                    $(elem).find('#remove_from_whitelist').hide()
+                });
+
+                $(elem).find('#remove_from_whitelist').click(function() {
+                    $(this).parent().hide();
+                });
             }
-            $('#remove_from_whitelist').click(function(event) {
-                $(this).parent().empty().hide()
-                //var subscriber_id = '#' + event.currentTarget.parentElement.id
-                //$(this).parentElement.hide()
-                //XMPP.delete_node(data.id);
-                //$(document).trigger('nodeinfo', {id: $(elem).attr('id')});
-                //$('#nodeinfo').empty().hide();
-                //$('#nodeinfo_whitelist').empty().hide();
-                //$('#nodeinfo_buttonlist').empty().hide();
-                //$('.node').removeClass('highlight');
-                //$("#roster").fadeIn();
-                console.log()
-            });
         });
-        console.log(subscribers)
     },
 
     on_node_subscriber_count: function(iq) {
@@ -207,9 +206,22 @@ var XMPP = {
                 subscribers =  subscribers + 1;
             }
         });
-    $("#" + node).append('<h1>' + subscribers + '</h1>');
-    console.log(node);
-    console.log(subscribers);
+        $("#" + node).append('<h1 class="count">' + subscribers + '</h1>');
+        console.log(node);
+        console.log(subscribers);
+    },
+
+    on_node_update_subscriber_count: function(iq) {
+        var subscribers = 0;
+        var node = $(iq).find('affiliations').attr('node')
+        $(iq).find('affiliation').each(function() {
+            if ($(this).attr('affiliation') != 'owner') {
+                subscribers =  subscribers + 1;
+            }
+        });
+        $("#" + node).find('h1').replaceWith('<h1 class="count">' + subscribers + '</h1>');
+        console.log(node);
+        console.log(subscribers);
     },
 
 
@@ -320,6 +332,16 @@ $(document).bind('node_subscriber_count', function(event, data) {
     console.log(nodeCountIQ)
 });
 
+$(document).bind('node_update_subscriber_count', function(event, data) {
+    console.log(data.id);
+    var nodeCountIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+        .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
+        .c('affiliations', {node: data.id});
+    XMPP.connection.sendIQ(nodeCountIQ, XMPP.on_node_update_subscriber_count, XMPP.on_error)
+    console.log(nodeCountIQ)
+});
+
+
 $(document).bind('nodeinfo', function(event, data) {
     $("#roster").hide();
     $('#nodeinfo_whitelist').empty().show();
@@ -370,8 +392,8 @@ $(document).ready(function() {
     $('#login-screen').hide();
     $('#login_spinner').show();
     $(document).trigger('connect', {
-        jid: 'pubsubber@snakedesert.se',
-        password: 'secret'
+        jid: 'user',
+        password: 'pass'
     });
 });
 
