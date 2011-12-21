@@ -27,10 +27,10 @@ or implied, of NORDUnet A/S.
  */
 
 var XMPP = {
-	connection: null,
-	my_jid: null,
+    connection: null,
+    my_jid: null,
     nodes: {},
-    PUBSUBSERVICE: 'pubsub.example.com',
+    PUBSUBSERVICE: 'pubsub.snakedesert.se',
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -179,8 +179,22 @@ var XMPP = {
                 var name2 = splitName[1] || '';
                 $('#nodeinfo_whitelist').append('<div class="drag box2 left" id="' + id + '">' +
                                         '<span class="' + id + '-canvas"' + '></span>' +
-                                        '<span>' + name1 + '<br>' + name2 + '</span></div>');
+                                        '<span>' + name1 + '<br>' + name2 + '</span>' +
+                                        '<a class="delete" id="remove_from_whitelist" href="#">X</a>' + '</div>');
             }
+            $('#remove_from_whitelist').click(function(event) {
+                $(this).parent().empty().hide()
+                //var subscriber_id = '#' + event.currentTarget.parentElement.id
+                //$(this).parentElement.hide()
+                //XMPP.delete_node(data.id);
+                //$(document).trigger('nodeinfo', {id: $(elem).attr('id')});
+                //$('#nodeinfo').empty().hide();
+                //$('#nodeinfo_whitelist').empty().hide();
+                //$('#nodeinfo_buttonlist').empty().hide();
+                //$('.node').removeClass('highlight');
+                //$("#roster").fadeIn();
+                console.log()
+            });
         });
         console.log(subscribers)
     },
@@ -214,7 +228,7 @@ var XMPP = {
 };
 
 $(document).bind('connect', function(ev, data) {
-	var conn = new Strophe.Connection("/http-bind");
+    var conn = new Strophe.Connection("/http-bind");
 
     conn.xmlInput = function (body) {
         console.log(body);
@@ -224,22 +238,22 @@ $(document).bind('connect', function(ev, data) {
         console.log(body);
     };
 
-	XMPP.my_jid = data.jid;
-	conn.connect(data.jid, data.password, function(status) {
-        	if (status === Strophe.Status.CONNECTED) {
-            		$(document).trigger('connected');
-        	} else if (status === Strophe.Status.DISCONNECTED) {
-            		$(document).trigger('disconnected');
-		}
-	});
-	XMPP.connection = conn;
+    XMPP.my_jid = data.jid;
+    conn.connect(data.jid, data.password, function(status) {
+            if (status === Strophe.Status.CONNECTED) {
+                    $(document).trigger('connected');
+            } else if (status === Strophe.Status.DISCONNECTED) {
+                    $(document).trigger('disconnected');
+        }
+    });
+    XMPP.connection = conn;
 });
 
 $(document).bind('connected', function () {
     $('#login_spinner').hide();
     $('#main-screen').toggle("fast");
-	$('#label-online').toggle("fast");
-	var rosterIQ = $iq({type: 'get'})
+    $('#label-online').toggle("fast");
+    var rosterIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'jabber:iq:roster'});
     var pubSubIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
         .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
@@ -248,14 +262,14 @@ $(document).bind('connected', function () {
         .c('affiliations');
     var vCardIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'vcard-temp'});
-	XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
-	XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
-	XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
+    XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
+    XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
+    XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
 });
 
 $(document).bind('disconnected', function () {
-	$('#label-online').removeClass('success').addClass('important').text("Offline");
-	XMPP.connection = null;
+    $('#label-online').removeClass('success').addClass('important').text("Offline");
+    XMPP.connection = null;
 });
 
 $(document).bind('drop', function(event, ui) {
@@ -333,31 +347,31 @@ $(document).bind('nodeinfo', function(event, data) {
 });
 
 $(document).ready(function() {
-	$('#connect-button').click(function() {
-		$("#login-form").fadeIn();
-	});
+    $('#connect-button').click(function() {
+        $("#login-form").fadeIn();
+    });
 
-	$('#login-button').click(function() {
-		$(document).trigger('connect', {
-        		jid: $('#jid').val().toLowerCase(),
-			    password: $('#password').val()
-		});
-		$('#login-screen').hide();
+    $('#login-button').click(function() {
+        $(document).trigger('connect', {
+                jid: $('#jid').val().toLowerCase(),
+                password: $('#password').val()
+        });
+        $('#login-screen').hide();
         $('#login_spinner').show();
-	});
+    });
 
     $('#create-node-button').click(function () {
         $("#my-modal").modal('hide');
         $(document).trigger('create_node_with_config', {
-        		node: $('#node').val()
-		});
+                node: $('#node').val()
+        });
     });
 
     $('#login-screen').hide();
     $('#login_spinner').show();
     $(document).trigger('connect', {
-        jid: 'user',
-	    password: 'password'
-	});
+        jid: 'pubsubber@snakedesert.se',
+        password: 'secret'
+    });
 });
 
