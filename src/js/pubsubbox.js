@@ -57,6 +57,7 @@ var XMPP = {
     },
 
     delete_node: function(nodeID) {
+        console.log("delete node " + nodeID)
         var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('delete', {node:nodeID});
@@ -173,11 +174,15 @@ var XMPP = {
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') === "owner") {
                 if (XMPP.nodes[$(this).attr('node')]) {
-                    var elem = $('<div class="box_node drop left node" id="' + $(this).attr('node') + '""><strong>' + XMPP.nodes[$(this).attr('node')] + '</strong><br><br></div>');
+                    var elem = $('<div class="box_node drop left" id="' +
+                                    $(this).attr('node') +
+                                    '""><strong>' + XMPP.nodes[$(this).attr('node')] +
+                                    '</strong><br><br></div>');
+                    $("#" + $(this).attr('node')).remove();
                     $(document).trigger('node_subscriber_count', {id: $(elem).attr('id')});
                     $('#pubsub').append(elem);
                     $(elem).click(function() {
-                        $('.node').removeClass('highlight');
+                        $('.box_node').removeClass('highlight');
                         $(elem).addClass('highlight');
                         $(document).trigger('node_info', {id: $(elem).attr('id')});
                     });
@@ -246,19 +251,34 @@ var XMPP = {
             }
         });
         $("#" + node).find('h1').replaceWith('<h1 class="count">' + subscribers + '</h1>');
+    },
+
+    on_create_node_whitelist: function(iq) {
+        var pubSubIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+            .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
+        XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
+        node = $(iq).find('create').attr('node')
+        //XMPP.nodes[node = name];
+        //$("#pubsub").append('<div class="box_node drop left" id="' + XMPP.nodes[node] + '""><strong>' + data.node + '</strong><br><br><h1>0</h1></h1></div>')
+        //$(".drop").droppable({
+        //    drop: function(event, ui) {
+        //        $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
+        //    }
+        //});
+        console.log(node);
     }
 };
 
 $(document).bind('connect', function(ev, data) {
     var conn = new Strophe.Connection("/http-bind");
 
-    conn.xmlInput = function (body) {
-        console.log(body);
-    };
+    //conn.xmlInput = function (body) {
+    //    console.log(body);
+    //};
 
-    conn.xmlOutput = function (body) {
-        console.log(body);
-    };
+    //conn.xmlOutput = function (body) {
+    //    console.log(body);
+    //};
 
     XMPP.my_jid = data.jid;
     conn.connect(data.jid, data.password, function(status) {
@@ -294,7 +314,7 @@ $(document).bind('disconnected', function () {
     XMPP.connection = null;
 });
 
-$(document).bind('create_node_with_config', function(event, data) {
+$(document).bind('create_node_whitelist', function(event, data) {
     var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
         .c('create')
@@ -309,13 +329,7 @@ $(document).bind('create_node_with_config', function(event, data) {
         .up().up()
         .c('field', {"var": 'pubsub#title'})
         .c('value').t(data.node);
-    $("#pubsub").append('<div class="box_node drop left"><strong>' + data.node + '</strong><br><br><h1>0</h1></h1></div>')
-    $(".drop").droppable({
-        drop: function(event, ui) {
-                   $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
-        }
-    });
-    XMPP.connection.sendIQ(iq);
+    XMPP.connection.sendIQ(iq, XMPP.on_create_node_whitelist);
 });
 
 $(document).bind('node_subscriber_count', function(event, data) {
@@ -342,14 +356,14 @@ $(document).bind('node_info', function(event, data) {
         $('#node_info').empty().hide();
         $('#node_info_whitelist').empty().hide();
         $('#node_info_buttonlist').empty().hide();
-        $('.node').removeClass('highlight');
+        $('.box_node').removeClass('highlight');
         $("#roster").fadeIn();
     });
     $('#button_close_node_info').click(function() {
         $('#node_info').empty().hide();
         $('#node_info_whitelist').empty().hide();
         $('#node_info_buttonlist').empty().hide();
-        $('.node').removeClass('highlight');
+        $('.box_node').removeClass('highlight');
         $("#roster").fadeIn();
     });
     var nodeAffiliationIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
@@ -374,7 +388,7 @@ $(document).ready(function() {
 
     $('#create-node-button').click(function () {
         $("#my-modal").modal('hide');
-        $(document).trigger('create_node_with_config', {
+        $(document).trigger('create_node_whitelist', {
                 node: $('#node').val()
         });
     });
