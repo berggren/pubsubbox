@@ -93,22 +93,29 @@ or implied, of NORDUnet A/S.
         <br>
 
         <div class="row well3 shadow">
-            <ul class="tabs">
-                <li class="active"><a href="#">Manage</a></li>
-                <li><a href="#">Activities</a></li>
+            <ul class="tabs" id="tab_menu">
+                <li class="active" id="manage_tab"><a id="manage_link" href="#manage">Manage</a></li>
+                <li id="activities_tab"><a id="activities_link" href="#activities">Activities</a></li>
             </ul>
 
-            <div class="span8 scroll">
+            <div class="span8 scroll" id="roster_container">
                 <h6>Roster</h6>
                 <div id="roster"></div>
                 <div id="node_info_buttonlist" class="hide"></div>
                 <div id="node_info_whitelist" class="hide"></div>
             </div>
 
-            <div class="span6 scroll">
+            <div class="span6 scroll" id="nodes_container">
                 <h6>Nodes</h6>
                 <div id="pubsub">
                     <div class="box_plus" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true"></div>
+                </div>
+            </div>
+
+            <div class="span6 scroll hidden" id="activities_container">
+                <h6>Activities</h6>
+                <div id="activities">
+
                 </div>
             </div>
         </div>

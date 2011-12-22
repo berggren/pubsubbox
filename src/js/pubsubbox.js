@@ -28,7 +28,7 @@ or implied, of NORDUnet A/S.
 
 var XMPP = {
     /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/pubsub_config.js',
+    CONFIG_FILE: 'js/pubsub_config2.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -57,7 +57,7 @@ var XMPP = {
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('affiliations', {node:nodeID})
-            .c('affiliation', {jid:jid, affiliation:'outcast'});
+            .c('affiliation', {jid:jid, affiliation:'none'});
         XMPP.connection.sendIQ(iq, XMPP.on_remove_from_whitelist(nodeID));
     },
 
@@ -393,6 +393,26 @@ $(document).bind('node_info', function(event, data) {
     XMPP.connection.sendIQ(nodeAffiliationIQ, XMPP.on_node_affiliation)
 });
 
+$(document).bind('change_tab', function(event, data) {
+    $('#tab_menu').find('li').each(function() {
+        $(this).removeClass('active');
+    });
+    $('#' + data.active_tab).addClass('active');
+});
+
+$(document).bind('manage_tab', function(event) {
+    $("#roster_container").show();
+    $("#nodes_container").show();
+    $("#activities_container").hide();
+});
+
+
+$(document).bind('activities_tab', function(event) {
+    $("#roster_container").hide();
+    $("#nodes_container").hide();
+    $("#activities_container").show();
+});
+
 $(document).ready(function() {
     $('#connect-button').click(function() {
         $("#login-form").fadeIn();
@@ -407,12 +427,25 @@ $(document).ready(function() {
         $('#login_spinner').show();
     });
 
-    $('#create-node-button').click(function () {
+    $('#create-node-button').click(function() {
         $("#my-modal").modal('hide');
         $(document).trigger('create_node_whitelist', {
                 node: $('#node').val()
         });
     });
+
+    $('#activities_link').click(function() {
+        $(document).trigger('change_tab', {
+                active_tab: 'activities_tab'});
+        $(document).trigger('activities_tab');
+    });
+
+    $('#manage_link').click(function() {
+        $(document).trigger('change_tab', {
+                active_tab: 'manage_tab'});
+        $(document).trigger('manage_tab');
+    });
+
 
     $('#login-screen').hide();
     $('#login_spinner').show();
