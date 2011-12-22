@@ -83,7 +83,7 @@ div.scroll2 {
     -webkit-border-radius: 6px;
     border-radius: 6px;
 }
-.box {
+.box_node {
     text-align: center;
     font-weight: bold;
     width: 90px;
@@ -91,21 +91,21 @@ div.scroll2 {
     padding: 5px;
     background: #E1E6EB;
     border: 1px solid #BDC2C7;
-    margin: 1px;
-    margin-bottom: 4px;
+    margin: 2px;
 }
 
-.box2 {
-    float: left;
+.box_node h1 {
+    color: #999;
+}
+
+.box_roster {
     text-align: center;
     width: 90px;
     height: 90px;
     padding: 5px;
     background:#fff;
-    border: 1px solid #BDC2C7;
-    margin: 1px;
-    margin-bottom: 4px;
-    margin-left: 5px;
+    border: 1px solid #f1f1f1;
+    margin: 2px;
 }
 
 .box_plus {
@@ -116,17 +116,7 @@ div.scroll2 {
     padding: 5px;
     background:#fff url('/img/plus.png');
     border: 1px solid #BDC2C7;
-    margin: 1px;
-    margin-bottom: 4px;
-    margin-left: 5px;
-}
-
-.box h1 {
-    color: silver;
-}
-
-.left-border {
-    border-left: 1px solid silver;
+    margin: 2px;
 }
 
 canvas {
