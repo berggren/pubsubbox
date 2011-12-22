@@ -28,7 +28,7 @@ or implied, of NORDUnet A/S.
 
 var XMPP = {
     /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/pubsub_config.js',
+    CONFIG_FILE: 'js/klutt_config.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -181,7 +181,7 @@ var XMPP = {
 
     on_affiliation: function(iq) {
         $(iq).find('affiliation').each(function() {
-            if ($(this).attr('affiliation') === "owner") {
+            if ($(this).attr('affiliation') === "owner" && $(this).attr('affiliation') != 'outcast') {
                 if (XMPP.nodes[$(this).attr('node')]) {
                     var elem = $('<div class="box_node drop left" id="' +
                                     $(this).attr('node') +
@@ -246,7 +246,7 @@ var XMPP = {
         var subscribers = 0;
         var node = $(iq).find('affiliations').attr('node')
         $(iq).find('affiliation').each(function() {
-            if ($(this).attr('affiliation') != 'owner') {
+            if ($(this).attr('affiliation') != 'owner'&& $(this).attr('affiliation') != 'outcast') {
                 subscribers =  subscribers + 1;
             }
         });
@@ -257,7 +257,7 @@ var XMPP = {
         var subscribers = 0;
         var node = $(iq).find('affiliations').attr('node')
         $(iq).find('affiliation').each(function() {
-            if ($(this).attr('affiliation') != 'owner') {
+            if ($(this).attr('affiliation') != 'owner' && $(this).attr('affiliation') != 'outcast') {
                 subscribers =  subscribers + 1;
             }
         });
@@ -269,14 +269,6 @@ var XMPP = {
             .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
         XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
         node = $(iq).find('create').attr('node')
-        //XMPP.nodes[node = name];
-        //$("#pubsub").append('<div class="box_node drop left" id="' + XMPP.nodes[node] + '""><strong>' + data.node + '</strong><br><br><h1>0</h1></h1></div>')
-        //$(".drop").droppable({
-        //    drop: function(event, ui) {
-        //        $("<span class='label notice'>" + ui.draggable.text() + "</span><br>").appendTo(this);
-        //    }
-        //});
-        console.log(node);
     }
 
 };
