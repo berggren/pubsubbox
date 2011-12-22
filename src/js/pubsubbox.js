@@ -52,6 +52,14 @@ var XMPP = {
         XMPP.connection.sendIQ(iq);
     },
 
+    remove_from_whitelist: function(nodeID, jid) {
+        var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
+            .c('affiliations', {node:nodeID})
+            .c('affiliation', {jid:jid, affiliation:'outcast'});
+        XMPP.connection.sendIQ(iq);
+    },
+
     on_error: function(iq) {
         console.log("ERROR: " + iq);
     },
@@ -202,7 +210,7 @@ var XMPP = {
     on_node_affiliation: function(iq) {
         $("#spinner").hide();
         $(iq).find('affiliation').each(function() {
-            if ($(this).attr('affiliation') != 'owner') {
+            if ($(this).attr('affiliation') != 'owner' && $(this).attr('affiliation') != 'outcast') {
                 var jid = $(this).attr('jid');
                 var id = XMPP.jid_to_id(jid) + '-node_info';
                 var name = XMPP.roster[jid];
@@ -221,7 +229,9 @@ var XMPP = {
                     $(elem).find('#remove_from_whitelist').hide()
                 });
                 $(elem).find('#remove_from_whitelist').click(function() {
-                    $(this).parent().hide();
+                    nodeID = $(iq).find('affiliations').attr('node');
+                    XMPP.remove_from_whitelist(nodeID, jid);
+                    $(this).parent().empty().hide();
                 });
                 var vCardIQ = $iq({to: jid, type: 'get'})
                     .c('vCard', {xmlns: 'vcard-temp'});
@@ -267,6 +277,7 @@ var XMPP = {
         //});
         console.log(node);
     }
+
 };
 
 $(document).bind('connect', function(ev, data) {
