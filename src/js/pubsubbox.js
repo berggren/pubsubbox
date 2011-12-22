@@ -28,7 +28,7 @@ or implied, of NORDUnet A/S.
 
 var XMPP = {
     /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/klutt_config.js',
+    CONFIG_FILE: 'js/pubsub_config.js',
     connection: null,
     my_jid: null,
     nodes: {},
