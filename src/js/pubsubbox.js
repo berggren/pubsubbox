@@ -27,11 +27,12 @@ or implied, of NORDUnet A/S.
  */
 
 var XMPP = {
+    /* Set the relative path to the configuration file */
+    CONFIG_FILE: 'js/pubsub_config.js',
     connection: null,
     my_jid: null,
     nodes: {},
     roster: {},
-    PUBSUBSERVICE: 'pubsub.example.com',
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -45,7 +46,7 @@ var XMPP = {
     },
 
     on_add_to_whitelist: function(nodeID, jid) {
-        var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
+        var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('affiliations', {node:nodeID})
             .c('affiliation', {jid:jid, affiliation:'member' });
@@ -53,7 +54,7 @@ var XMPP = {
     },
 
     remove_from_whitelist: function(nodeID, jid) {
-        var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
+        var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('affiliations', {node:nodeID})
             .c('affiliation', {jid:jid, affiliation:'outcast'});
@@ -66,7 +67,7 @@ var XMPP = {
 
     delete_node: function(nodeID) {
         console.log("delete node " + nodeID)
-        var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
+        var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('delete', {node:nodeID});
         $('#' + nodeID).remove();
@@ -172,7 +173,7 @@ var XMPP = {
                 XMPP.nodes[$(this).attr('node')] = $(this).attr('name');
             }
         });
-        var affiliationIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+        var affiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
             .c('affiliations');
         XMPP.connection.sendIQ(affiliationIQ, XMPP.on_affiliation, XMPP.on_error);
@@ -264,7 +265,7 @@ var XMPP = {
     },
 
     on_create_node_whitelist: function(iq) {
-        var pubSubIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+        var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
             .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
         XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
         node = $(iq).find('create').attr('node')
@@ -292,11 +293,12 @@ $(document).bind('connect', function(ev, data) {
     //};
 
     XMPP.my_jid = data.jid;
+    XMPP.pubsubservice = data.pubsubservice;
     conn.connect(data.jid, data.password, function(status) {
-            if (status === Strophe.Status.CONNECTED) {
-                    $(document).trigger('connected');
-            } else if (status === Strophe.Status.DISCONNECTED) {
-                    $(document).trigger('disconnected');
+        if (status === Strophe.Status.CONNECTED) {
+            $(document).trigger('connected');
+        } else if (status === Strophe.Status.DISCONNECTED) {
+            $(document).trigger('disconnected');
         }
     });
     XMPP.connection = conn;
@@ -308,9 +310,9 @@ $(document).bind('connected', function () {
     $('#label-online').toggle("fast");
     var rosterIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'jabber:iq:roster'});
-    var pubSubIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+    var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
-    var affiliationIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+    var affiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
         .c('affiliations');
     var vCardIQ = $iq({type: 'get'})
@@ -326,7 +328,7 @@ $(document).bind('disconnected', function () {
 });
 
 $(document).bind('create_node_whitelist', function(event, data) {
-    var iq = $iq({to:XMPP.PUBSUBSERVICE, type:'set'})
+    var iq = $iq({to:XMPP.pubsubservice, type:'set'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
         .c('create')
         .up()
@@ -344,14 +346,14 @@ $(document).bind('create_node_whitelist', function(event, data) {
 });
 
 $(document).bind('node_subscriber_count', function(event, data) {
-    var nodeCountIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+    var nodeCountIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
         .c('affiliations', {node: data.id});
     XMPP.connection.sendIQ(nodeCountIQ, XMPP.on_node_subscriber_count, XMPP.on_error)
 });
 
 $(document).bind('node_update_subscriber_count', function(event, data) {
-    var nodeCountIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+    var nodeCountIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
         .c('affiliations', {node: data.id});
     XMPP.connection.sendIQ(nodeCountIQ, XMPP.on_node_update_subscriber_count, XMPP.on_error)
@@ -377,7 +379,7 @@ $(document).bind('node_info', function(event, data) {
         $('.box_node').removeClass('highlight');
         $("#roster").fadeIn();
     });
-    var nodeAffiliationIQ = $iq({to: XMPP.PUBSUBSERVICE, type: 'get'})
+    var nodeAffiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
         .c('affiliations', {node: data.id});
     XMPP.connection.sendIQ(nodeAffiliationIQ, XMPP.on_node_affiliation)
@@ -406,8 +408,11 @@ $(document).ready(function() {
 
     $('#login-screen').hide();
     $('#login_spinner').show();
-    $(document).trigger('connect', {
-        jid: 'user',
-        password: 'pass'
+    $.getScript(XMPP.CONFIG_FILE, function(){
+        $(document).trigger('connect', {
+            jid: XMPPConfig.jid,
+            password: XMPPConfig.password,
+            pubsubservice: XMPPConfig.pubsubservice
+        });
     });
 });
