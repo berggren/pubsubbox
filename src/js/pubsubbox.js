@@ -58,7 +58,13 @@ var XMPP = {
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('affiliations', {node:nodeID})
             .c('affiliation', {jid:jid, affiliation:'outcast'});
-        XMPP.connection.sendIQ(iq);
+        XMPP.connection.sendIQ(iq, XMPP.on_remove_from_whitelist(nodeID));
+    },
+
+    on_remove_from_whitelist: function(nodeID) {
+        setTimeout(function(){
+            $(document).trigger('node_update_subscriber_count', {id: nodeID});
+        }, 50);
     },
 
     on_error: function(iq) {
