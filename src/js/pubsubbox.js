@@ -67,10 +67,6 @@ var XMPP = {
         }, 50);
     },
 
-    on_error: function(iq) {
-        console.log("ERROR: " + iq);
-    },
-
     delete_node: function(nodeID) {
         console.log("delete node " + nodeID)
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
@@ -98,7 +94,18 @@ var XMPP = {
             var foo = "hejsan";
             XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard, XMPP.on_error);
         });
+        XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
+        XMPP.connection.send($pres());
     },
+
+    on_presence: function(presence)  {
+        var type = $(presence).attr('type');
+        var from = $(presence).attr('from');
+        console.log(type, from);
+
+
+    },
+
 
     on_vcard: function(iq) {
         var vCard = $(iq).find("vCard");
@@ -275,8 +282,11 @@ var XMPP = {
             .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
         XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
         node = $(iq).find('create').attr('node')
-    }
+    },
 
+    on_error: function(iq) {
+        console.log("ERROR: " + iq);
+    }
 };
 
 $(document).bind('connect', function(ev, data) {
