@@ -102,8 +102,6 @@ var XMPP = {
         var type = $(presence).attr('type');
         var from = $(presence).attr('from');
         console.log(type, from);
-
-
     },
 
 
