@@ -87,8 +87,8 @@ or implied, of NORDUnet A/S.
                 <h1 class="left" id="fullname"></h1>
                 <span class="label success right hidden" id="label-online" style="margin-left:5px;margin-top:7px;">Online</span>
                 <br><br><br>
-                <button class="btn info" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true">Add node</button>
-                <button class="btn info">Add contact</button>
+                <button class="btn info" data-controls-modal="add-node-modal" data-backdrop="true" data-keyboard="true">Add node</button>
+                <button class="btn info" data-controls-modal="add-contact-modal" data-backdrop="true" data-keyboard="true">Add contact</button>
             </div>
         </div>
         <br>
@@ -131,7 +131,7 @@ or implied, of NORDUnet A/S.
         </div>
 </div>
 
-<div id="my-modal" class="modal hide fade">
+<div id="add-node-modal" class="modal hide fade">
     <div class="modal-header">
         <a href="#" class="close">&times;</a>
         <h3>Create new PubSub node</h3>
@@ -148,6 +148,25 @@ or implied, of NORDUnet A/S.
         <button class="btn primary" id="create-node-button">Create</button>
     </div>
 </div>
+
+    <div id="add-contact-modal" class="modal hide fade">
+        <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>Add contact</h3>
+        </div>
+        <div class="modal-body">
+            <form>
+                <label for="xlInput">jid</label>
+                <div class="input">
+                    <input class="xlarge" id="contact" size="30" type="text" />
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn primary" id="add-contact-button">Send subscription request</button>
+        </div>
+    </div>
+
 
 <div id="login_spinner" class="hide center vcenter">
     &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner.gif" />

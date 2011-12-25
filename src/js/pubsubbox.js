@@ -416,6 +416,13 @@ $(document).bind('create_node_whitelist', function(event, data) {
     XMPP.connection.sendIQ(iq, XMPP.on_create_node_whitelist);
 });
 
+$(document).bind('add_contact', function(event, data) {
+    XMPP.connection.send($pres({
+        to: data.jid,
+        "type": "subscribe"
+    }))
+});
+
 $(document).bind('node_subscriber_count', function(event, data) {
     var nodeCountIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
@@ -500,9 +507,16 @@ $(document).ready(function() {
     });
 
     $('#create-node-button').click(function() {
-        $("#my-modal").modal('hide');
+        $("#add-node-modal").modal('hide');
         $(document).trigger('create_node_whitelist', {
                 node: $('#node').val()
+        });
+    });
+
+    $('#add-contact-button').click(function() {
+        $("#add-contact-modal").modal('hide');
+        $(document).trigger('add_contact', {
+            jid: $('#contact').val()
         });
     });
 
