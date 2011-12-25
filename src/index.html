@@ -31,7 +31,8 @@ or implied, of NORDUnet A/S.
 
 <html>
 <head>
-    <script src='js/jquery-1.6.4.min.js'></script>
+    <meta http-equiv="content-script-type" content="text/javascript">
+    <script src='js/jquery-1.7.1.min.js'></script>
     <script src='js/jquery-ui-1.8.16.min.js'></script>
     <script src='js/bootstrap-tabs-1.3.0.js'></script>
     <script src='js/bootstrap-modal-1.3.0.js'></script>
@@ -86,8 +87,8 @@ or implied, of NORDUnet A/S.
                 <h1 class="left" id="fullname"></h1>
                 <span class="label success right hidden" id="label-online" style="margin-left:5px;margin-top:7px;">Online</span>
                 <br><br><br>
-                <button class="btn info" id="send-info">Profile</button>
-                <button class="btn ">+ Contact</button>
+                <button class="btn info" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true">Add node</button>
+                <button class="btn info">Add contact</button>
             </div>
         </div>
         <br>
@@ -95,7 +96,8 @@ or implied, of NORDUnet A/S.
         <div class="row well3 shadow">
             <ul class="tabs" id="tab_menu">
                 <li class="active" id="manage_tab"><a id="manage_link" href="#manage">Manage</a></li>
-                <li id="activities_tab"><a id="activities_link" href="#activities">Activities</a></li>
+                <li id="activities_tab"><a id="activities_link" href="#activities">Activity Stream</a></li>
+                <li id="notification_tab"><a id="notification_link" href="#notification">Notifications <span class="label important hidden" id="notification_count">0</span></a></li>
             </ul>
 
             <div class="span8 scroll" id="roster_container">
@@ -108,7 +110,7 @@ or implied, of NORDUnet A/S.
             <div class="span6 scroll" id="nodes_container">
                 <h6>Nodes</h6>
                 <div id="pubsub">
-                    <div class="box_plus" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true"></div>
+                    <!--<div class="box_plus" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true"></div>-->
                 </div>
             </div>
 
@@ -118,6 +120,14 @@ or implied, of NORDUnet A/S.
 
                 </div>
             </div>
+
+            <div class="span6 scroll hidden" id="notification_container">
+                <div id="notification">
+                    <h6>Notifications</h6>
+                    <div id="subscription_request" class="hidden"><h5>Pending requests</h5><table id="subscription_request_table"></table></div>
+                </div>
+            </div>
+
         </div>
 </div>
 

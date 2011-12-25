@@ -33,6 +33,7 @@ var XMPP = {
     my_jid: null,
     nodes: {},
     roster: {},
+    notifications: 0,
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -77,33 +78,94 @@ var XMPP = {
     },
 
     on_roster: function(iq) {
+        $("#roster").empty();
         $(iq).find('item').each(function() {
-            var jid = $(this).attr('jid');
-            var id = XMPP.jid_to_id(jid);
-            var name = $(this).attr('name') || XMPP.jid_without_at(jid);
-            XMPP.roster[jid] = name;
-            var splitName = name.split(" ");
-            var name1 = splitName[0] || '';
-            var name2 = splitName[1] || '';
-            var elem = $('<div class="drag box_roster left" jid="' + jid + '" id="' + id + '">' +
-                '<span class="' + id + '-canvas"' + '></span>' +
-                '<span>' + name1 + '<br>' + name2 + '</span></div>');
-            $('#roster').append(elem);
-            var vCardIQ = $iq({to: jid, type: 'get'})
-                .c('vCard', {xmlns: 'vcard-temp'});
-            var foo = "hejsan";
-            XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard, XMPP.on_error);
+            var subscription = $(this).attr('subscription');
+            if (subscription === 'both' || subscription === 'from') {
+                var jid = $(this).attr('jid');
+                var id = XMPP.jid_to_id(jid);
+                var name = $(this).attr('name') || XMPP.jid_without_at(jid);
+                XMPP.roster[jid] = name;
+                var splitName = name.split(" ");
+                var name1 = splitName[0] || '';
+                var name2 = splitName[1] || '';
+                var elem = $('<div class="drag box_roster left" jid="' + jid + '" id="' + id + '">' +
+                    '<span class="' + id + '-canvas"' + '></span>' +
+                    '<span>' + name1 + '<br>' + name2 + '</span></div>');
+                $('#roster').append(elem);
+                var vCardIQ = $iq({to: jid, type: 'get'})
+                    .c('vCard', {xmlns: 'vcard-temp'});
+                XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard, XMPP.on_error);
+            }
         });
-        XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
         XMPP.connection.send($pres());
+    },
+
+    on_roster_changed: function(iq) {
+        var rosterIQ = $iq({type: 'get'})
+            .c('query', {xmlns: 'jabber:iq:roster'});
+        XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
+    },
+
+    update_notification_count: function(plus_or_minus) {
+        if (plus_or_minus === 'plus') {
+            XMPP.notifications = XMPP.notifications + 1;
+        } else {
+            XMPP.notifications = XMPP.notifications - 1;
+        }
+        if (XMPP.notifications === 0) {
+            $('#notification_count').hide();
+            $('#subscription_request').hide()
+        } else {
+            $('#notification_count').replaceWith('<span class="label important hidden" id="notification_count">' + XMPP.notifications + '</span>');
+            $('#notification_count').show();
+        }
     },
 
     on_presence: function(presence)  {
         var type = $(presence).attr('type');
         var from = $(presence).attr('from');
-        console.log(type, from);
+        var from_bare = Strophe.getBareJidFromJid(from);
+        if (type === 'subscribe') {
+            var id_subscription = XMPP.jid_to_id(from_bare) + '-subscription_request'
+            var id_allow = XMPP.jid_to_id(from_bare) + '-subscription_allow'
+            var id_deny = XMPP.jid_to_id(from_bare) + '-subscription_deny'
+            var elem = '<tr id="' + id_subscription + '"><td>' + from_bare + '</td><td><button class="btn success" id="' + id_allow + '">Yes</button></td><td><span class="btn error" id="' + id_deny + '">No</span></td></tr>';
+            $('#subscription_request').show();
+            $('#subscription_request_table').append(elem);
+
+            XMPP.update_notification_count('plus');
+
+            $('#' + id_allow).click(function() {
+                XMPP.connection.send($pres({
+                    to: from_bare,
+                    "type": "subscribed"
+                }));
+                XMPP.connection.send($pres({
+                    to: from_bare,
+                    "type": "subscribe"
+                }));
+                $("#" + id_subscription).remove();
+                XMPP.update_notification_count('minus')
+            });
+
+            $('#' + id_deny).click(function() {
+                XMPP.connection.send($pres({
+                    to: from_bare,
+                    "type": "unsubscribed"
+                }));
+                $("#" + id_subscription).remove();
+                XMPP.update_notification_count('minus')
+            });
+
+        }
+        return true;
     },
 
+    on_message: function(message)  {
+        console.log(message);
+        return true;
+    },
 
     on_vcard: function(iq) {
         var vCard = $(iq).find("vCard");
@@ -323,6 +385,9 @@ $(document).bind('connected', function () {
         .c('affiliations');
     var vCardIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'vcard-temp'});
+    XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
+    XMPP.connection.addHandler(XMPP.on_message, null, "message", "chat");
+    XMPP.connection.addHandler(XMPP.on_roster_changed, "jabber:iq:roster", "iq", "set");
     XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
     XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
     XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
@@ -369,7 +434,7 @@ $(document).bind('node_info', function(event, data) {
     $("#roster").hide();
     $('#node_info_whitelist').empty().show();
     $("#node_info_buttonlist").empty().show().append('<button id="button_close_node_info" class="btn">&laquo; Back to roster</button>')
-    $("#node_info_buttonlist").append('<button id="button_delete_node" class="btn error right">Delete node</button><br><br>');
+    $("#node_info_buttonlist").append('<button id="button_delete_node" class="btn error" style="margin-left:10px;">Delete node</button><br><br>');
     $('#button_delete_node').click(function() {
         XMPP.delete_node(data.id);
         $('#node_info').empty().hide();
@@ -402,13 +467,22 @@ $(document).bind('manage_tab', function(event) {
     $("#roster_container").show();
     $("#nodes_container").show();
     $("#activities_container").hide();
+    $("#notification_container").hide();
 });
 
 
 $(document).bind('activities_tab', function(event) {
     $("#roster_container").hide();
     $("#nodes_container").hide();
+    $("#notification_container").hide();
     $("#activities_container").show();
+});
+
+$(document).bind('notification_tab', function(event) {
+    $("#roster_container").hide();
+    $("#nodes_container").hide();
+    $("#activities_container").hide();
+    $("#notification_container").show();
 });
 
 $(document).ready(function() {
@@ -444,6 +518,11 @@ $(document).ready(function() {
         $(document).trigger('manage_tab');
     });
 
+    $('#notification_link').click(function() {
+        $(document).trigger('change_tab', {
+            active_tab: 'notification_tab'});
+        $(document).trigger('notification_tab');
+    });
 
     $('#login-screen').hide();
     $('#login_spinner').show();

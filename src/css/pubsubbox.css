@@ -122,3 +122,7 @@ div.scroll2 {
 canvas {
     background:#E1E8ED;
 }
+
+.noborder {
+    border:0;
+}
