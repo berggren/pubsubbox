@@ -83,10 +83,9 @@ or implied, of NORDUnet A/S.
         <div class="row">
             <div class="span16">
                 <br>
-                <canvas class="left" id='avatar' width='90' height='90'></canvas>
-                <h1 class="left" id="fullname"></h1>
-                <span class="label success right hidden" id="label-online" style="margin-left:5px;margin-top:7px;">Online</span>
-                <br><br><br>
+                <a href="/"><canvas class="left" id='avatar' width='68' height='68'></canvas></a>
+                <h1 style="margin-top:1px;margin-bottom:5px;" id="fullname"></h1>
+                <span class="label success right hidden" id="label-online" style="margin-top:-30px;">Online</span>
                 <button class="btn info" data-controls-modal="add-node-modal" data-backdrop="true" data-keyboard="true">Add node</button>
                 <button class="btn info" data-controls-modal="add-contact-modal" data-backdrop="true" data-keyboard="true">Add contact</button>
             </div>
@@ -96,6 +95,7 @@ or implied, of NORDUnet A/S.
         <div class="row well3 shadow">
             <ul class="tabs" id="tab_menu">
                 <li class="active" id="manage_tab"><a id="manage_link" href="#manage">Manage</a></li>
+                <li id="discovery_tab"><a id="discovery_link" href="#discovery">Discovery</a></li>
                 <li id="activities_tab"><a id="activities_link" href="#activities">Activity Stream</a></li>
                 <li id="notification_tab"><a id="notification_link" href="#notification">Notifications <span class="label important hidden" id="notification_count">0</span></a></li>
             </ul>
@@ -109,16 +109,17 @@ or implied, of NORDUnet A/S.
 
             <div class="span6 scroll" id="nodes_container">
                 <h6>Nodes</h6>
-                <div id="pubsub">
-                    <!--<div class="box_plus" data-controls-modal="my-modal" data-backdrop="true" data-keyboard="true"></div>-->
-                </div>
+                <div id="pubsub"></div>
+            </div>
+
+            <div class="span6 scroll hidden" id="discovery_container">
+                <h6>Discovery</h6>
+                <div id="discovery"></div>
             </div>
 
             <div class="span6 scroll hidden" id="activities_container">
                 <h6>Activities</h6>
-                <div id="activities">
-
-                </div>
+                <div id="activities"></div>
             </div>
 
             <div class="span6 scroll hidden" id="notification_container">

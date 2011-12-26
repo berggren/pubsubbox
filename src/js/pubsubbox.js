@@ -33,7 +33,9 @@ var XMPP = {
     my_jid: null,
     nodes: {},
     roster: {},
+    domains: [],
     notifications: 0,
+    disco_nodes: {},
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -83,6 +85,7 @@ var XMPP = {
             var subscription = $(this).attr('subscription');
             if (subscription === 'both' || subscription === 'from') {
                 var jid = $(this).attr('jid');
+                var domain = jid.split('@')[1]
                 var id = XMPP.jid_to_id(jid);
                 var name = $(this).attr('name') || XMPP.jid_without_at(jid);
                 XMPP.roster[jid] = name;
@@ -96,9 +99,33 @@ var XMPP = {
                 var vCardIQ = $iq({to: jid, type: 'get'})
                     .c('vCard', {xmlns: 'vcard-temp'});
                 XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard, XMPP.on_error);
+                if ( $.inArray(domain, XMPP.domains) === -1 ) {
+                    XMPP.domains.push(domain);
+                    var service = 'pubsub.' + domain
+                    var iq =  $iq({to: service, type: 'get'})
+                        .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+                        .c('affiliations');
+                    XMPP.connection.sendIQ(iq, XMPP.on_pubsub_disco, XMPP.on_error);
+                };
+
             }
         });
         XMPP.connection.send($pres());
+    },
+
+    on_pubsub_disco: function(iq) {
+        var service = $(iq).attr('from');
+        var l = [];
+        $(iq).find('affiliation').each(function() {
+            if ($(this).attr('affiliation') === 'member') {
+                l.push($(this).attr('node'));
+            }
+        });
+        XMPP.disco_nodes[service] = l;
+        $('#discovery').append('<h3>' + service + '</h3>');
+        for (i in l) {
+            $('#discovery').append('<li>' + l[i] + '</li>');
+        }
     },
 
     on_roster_changed: function(iq) {
@@ -232,7 +259,7 @@ var XMPP = {
         var ctx = $('#avatar').get(0).getContext('2d');
         var image = new Image();
         image.onload = function() {
-            ctx.drawImage(image,0,0,90,90)
+            ctx.drawImage(image,0,0,68,68)
         };
         image.src = img_src;
         var jid = $(iq).attr('from');
@@ -241,6 +268,7 @@ var XMPP = {
     },
 
     on_pubsub_item: function(iq) {
+        console.log(iq);
         $(iq).find('item').each(function() {
             if ($(this).attr('node') != "/home") {
                 XMPP.nodes[$(this).attr('node')] = $(this).attr('name');
@@ -345,7 +373,8 @@ var XMPP = {
     },
 
     on_error: function(iq) {
-        console.log("ERROR: " + iq);
+        console.log('ERROR, take a look ast the followiung error-stanza:')
+        console.log(iq);
     }
 };
 
@@ -475,13 +504,22 @@ $(document).bind('manage_tab', function(event) {
     $("#nodes_container").show();
     $("#activities_container").hide();
     $("#notification_container").hide();
+    $("#discovery_container").hide();
 });
 
+$(document).bind('discovery_tab', function(event) {
+    $("#roster_container").hide();
+    $("#nodes_container").hide();
+    $("#activities_container").hide();
+    $("#notification_container").hide();
+    $("#discovery_container").show();
+});
 
 $(document).bind('activities_tab', function(event) {
     $("#roster_container").hide();
     $("#nodes_container").hide();
     $("#notification_container").hide();
+    $("#discovery_container").hide();
     $("#activities_container").show();
 });
 
@@ -489,6 +527,7 @@ $(document).bind('notification_tab', function(event) {
     $("#roster_container").hide();
     $("#nodes_container").hide();
     $("#activities_container").hide();
+    $("#discovery_container").hide();
     $("#notification_container").show();
 });
 
@@ -530,6 +569,12 @@ $(document).ready(function() {
         $(document).trigger('change_tab', {
                 active_tab: 'manage_tab'});
         $(document).trigger('manage_tab');
+    });
+
+    $('#discovery_link').click(function() {
+        $(document).trigger('change_tab', {
+            active_tab: 'discovery_tab'});
+        $(document).trigger('discovery_tab');
     });
 
     $('#notification_link').click(function() {
