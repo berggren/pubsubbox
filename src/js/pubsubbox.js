@@ -36,6 +36,7 @@ var XMPP = {
     domains: [],
     notifications: 0,
     disco_nodes: {},
+    disco_subscriptions: {},
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -85,7 +86,7 @@ var XMPP = {
             var subscription = $(this).attr('subscription');
             if (subscription === 'both' || subscription === 'from') {
                 var jid = $(this).attr('jid');
-                var domain = jid.split('@')[1]
+                var domain = jid.split('@')[1];
                 var id = XMPP.jid_to_id(jid);
                 var name = $(this).attr('name') || XMPP.jid_without_at(jid);
                 XMPP.roster[jid] = name;
@@ -101,13 +102,12 @@ var XMPP = {
                 XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard, XMPP.on_error);
                 if ( $.inArray(domain, XMPP.domains) === -1 ) {
                     XMPP.domains.push(domain);
-                    var service = 'pubsub.' + domain
+                    var service = 'pubsub.' + domain;
                     var iq =  $iq({to: service, type: 'get'})
                         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
                         .c('affiliations');
                     XMPP.connection.sendIQ(iq, XMPP.on_pubsub_disco, XMPP.on_error);
-                };
-
+                }
             }
         });
         XMPP.connection.send($pres());
@@ -123,9 +123,19 @@ var XMPP = {
         });
         XMPP.disco_nodes[service] = l;
         $('#discovery').append('<h3>' + service + '</h3>');
-        for (i in l) {
-            $('#discovery').append('<li>' + l[i] + '</li>');
+        for (var n in l) {
+            $('#discovery').append('<span id="' + l[n] + '-disco">' + l[n] + '</span><span id="' + l[n] + '-disco-state" class="label success right">subscribe&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>');
         }
+        var subscriptionIQ =  $iq({to: service, type: 'get'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+            .c('subscriptions');
+        XMPP.connection.sendIQ(subscriptionIQ, XMPP.on_get_subscriptions, XMPP.on_error);
+    },
+
+    on_get_subscriptions: function(iq) {
+        $(iq).find('subscription').each(function(){
+            $('#' + $(this).attr('node') + '-disco-state').replaceWith('<span class="label right">unsubscribe</span>')
+        })
     },
 
     on_roster_changed: function(iq) {
@@ -190,7 +200,9 @@ var XMPP = {
     },
 
     on_message: function(message)  {
-        console.log(message);
+        $(message).find('item').each(function() {
+            $('#activities').append($(this).find('event').text() + '<br>');
+        });
         return true;
     },
 
@@ -268,7 +280,6 @@ var XMPP = {
     },
 
     on_pubsub_item: function(iq) {
-        console.log(iq);
         $(iq).find('item').each(function() {
             if ($(this).attr('node') != "/home") {
                 XMPP.nodes[$(this).attr('node')] = $(this).attr('name');
@@ -373,21 +384,24 @@ var XMPP = {
     },
 
     on_error: function(iq) {
-        console.log('ERROR, take a look ast the followiung error-stanza:')
-        console.log(iq);
+        if (XMPPConfig.debug === true) {
+            console.log('ERROR, take a look ast the followiung error-stanza:')
+            console.log(iq);
+        }
     }
 };
 
 $(document).bind('connect', function(ev, data) {
     var conn = new Strophe.Connection("/http-bind");
 
-    //conn.xmlInput = function (body) {
-    //    console.log(body);
-    //};
-
-    //conn.xmlOutput = function (body) {
-    //    console.log(body);
-    //};
+    if (XMPPConfig.debug === true) {
+        conn.xmlInput = function (body) {
+            console.log(body);
+        };
+        conn.xmlOutput = function (body) {
+            console.log(body);
+        };
+    }
 
     XMPP.my_jid = data.jid;
     XMPP.pubsubservice = data.pubsubservice;
@@ -415,7 +429,7 @@ $(document).bind('connected', function () {
     var vCardIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'vcard-temp'});
     XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
-    XMPP.connection.addHandler(XMPP.on_message, null, "message", "chat");
+    XMPP.connection.addHandler(XMPP.on_message, null, "message", "headline");
     XMPP.connection.addHandler(XMPP.on_roster_changed, "jabber:iq:roster", "iq", "set");
     XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
     XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
