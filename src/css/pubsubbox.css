@@ -4,25 +4,25 @@ body {
 }
 
 .hidden {
-	display: none;
+    display: none;
 }
 
 .xlinput {
-	padding:15px;
+    padding:15px;
     color:#000;
 }
 
 .right {
-	float:right;
+    float:right;
 }
 
 .left {
-	float:left;
+    float:left;
 }
 
 #avatar {
-	margin-top:4px;
-	margin-right: 10px;
+    margin-top:4px;
+    margin-right: 10px;
 }
 
 .log {
@@ -99,6 +99,7 @@ div.scroll2 {
 }
 
 .box_roster {
+    position:relative;
     text-align: center;
     width: 90px;
     height: 90px;
@@ -125,4 +126,13 @@ canvas {
 
 .noborder {
     border:0;
+}
+
+.vcard_remove {
+    position:absolute;
+    top:0;
+    right:0px;
+    width: 14px;
+    height: 14px;
+    background:#fff url('/img/close.png');
 }
