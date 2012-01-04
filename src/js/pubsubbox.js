@@ -28,7 +28,7 @@ or implied, of NORDUnet A/S.
 
 var XMPP = {
     /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/pubsub_config.js',
+    CONFIG_FILE: 'js/pubsub_config2.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -333,7 +333,7 @@ var XMPP = {
                 var elem = $('<div class="box_roster left" id="' + id + '-node_info">' +
                     '<span class="' + id + '-canvas"' + '></span>' +
                     '<span>' + name1 + '<br>' + name2 + '</span>' +
-                    '<a class="delete hidden" id="remove_from_whitelist" href="#">X</a>' + '</div>')
+                    '<div class="vcard_remove hidden" id="remove_from_whitelist"></div>' + '</div>')
                 $('#node_info_whitelist').append(elem);
                 $(elem).mouseenter(function() {
                     $(elem).find('#remove_from_whitelist').show()
