@@ -28,7 +28,7 @@ or implied, of NORDUnet A/S.
 
 var XMPP = {
     /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/pubsub_config2.js',
+    CONFIG_FILE: 'js/pubsub_config.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -36,7 +36,6 @@ var XMPP = {
     domains: [],
     notifications: 0,
     disco_nodes: {},
-    disco_subscriptions: {},
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
@@ -72,7 +71,7 @@ var XMPP = {
     },
 
     delete_node: function(nodeID) {
-        console.log("delete node " + nodeID)
+        console.log("delete node " + nodeID);
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('delete', {node:nodeID});
@@ -164,9 +163,9 @@ var XMPP = {
         var from = $(presence).attr('from');
         var from_bare = Strophe.getBareJidFromJid(from);
         if (type === 'subscribe') {
-            var id_subscription = XMPP.jid_to_id(from_bare) + '-subscription_request'
-            var id_allow = XMPP.jid_to_id(from_bare) + '-subscription_allow'
-            var id_deny = XMPP.jid_to_id(from_bare) + '-subscription_deny'
+            var id_subscription = XMPP.jid_to_id(from_bare) + '-subscription_request';
+            var id_allow = XMPP.jid_to_id(from_bare) + '-subscription_allow';
+            var id_deny = XMPP.jid_to_id(from_bare) + '-subscription_deny';
             var elem = '<tr id="' + id_subscription + '"><td>' + from_bare + '</td><td><button class="btn success" id="' + id_allow + '">Yes</button></td><td><span class="btn error" id="' + id_deny + '">No</span></td></tr>';
             $('#subscription_request').show();
             $('#subscription_request_table').append(elem);
@@ -200,8 +199,11 @@ var XMPP = {
     },
 
     on_message: function(message)  {
+        var service = $(message).attr('from');
+        var node = $(message).find('items').attr('node');
         $(message).find('item').each(function() {
-            $('#activities').append($(this).find('event').text() + '<br>');
+            var payload = $(this).find('event').text();
+            $('#activities').append('<span class="alert-message warning"><strong>' + service + '</strong> (' + node + ') ' + payload + '</span><br><br>');
         });
         return true;
     },
@@ -342,7 +344,7 @@ var XMPP = {
                     $(elem).find('#remove_from_whitelist').hide()
                 });
                 $(elem).find('#remove_from_whitelist').click(function() {
-                    nodeID = $(iq).find('affiliations').attr('node');
+                    var nodeID = $(iq).find('affiliations').attr('node');
                     XMPP.remove_from_whitelist(nodeID, jid);
                     $(this).parent().empty().hide();
                 });
@@ -356,7 +358,7 @@ var XMPP = {
 
     on_node_subscriber_count: function(iq) {
         var subscribers = 0;
-        var node = $(iq).find('affiliations').attr('node')
+        var node = $(iq).find('affiliations').attr('node');
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') != 'owner'&& $(this).attr('affiliation') != 'outcast') {
                 subscribers =  subscribers + 1;
@@ -367,7 +369,7 @@ var XMPP = {
 
     on_node_update_subscriber_count: function(iq) {
         var subscribers = 0;
-        var node = $(iq).find('affiliations').attr('node')
+        var node = $(iq).find('affiliations').attr('node');
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') != 'owner' && $(this).attr('affiliation') != 'outcast') {
                 subscribers =  subscribers + 1;
@@ -380,12 +382,11 @@ var XMPP = {
         var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
             .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
         XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
-        node = $(iq).find('create').attr('node')
     },
 
     on_error: function(iq) {
         if (XMPPConfig.debug === true) {
-            console.log('ERROR, take a look ast the followiung error-stanza:')
+            console.log('ERROR, take a look ast the followiung error-stanza:');
             console.log(iq);
         }
     }
@@ -423,9 +424,6 @@ $(document).bind('connected', function () {
         .c('query', {xmlns: 'jabber:iq:roster'});
     var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
-    var affiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
-        .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
-        .c('affiliations');
     var vCardIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'vcard-temp'});
     XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
@@ -483,7 +481,7 @@ $(document).bind('node_update_subscriber_count', function(event, data) {
 $(document).bind('node_info', function(event, data) {
     $("#roster").hide();
     $('#node_info_whitelist').empty().show();
-    $("#node_info_buttonlist").empty().show().append('<button id="button_close_node_info" class="btn">&laquo; Back to roster</button>')
+    $("#node_info_buttonlist").empty().show().append('<button id="button_close_node_info" class="btn">&laquo; Back to roster</button>');
     $("#node_info_buttonlist").append('<button id="button_delete_node" class="btn error" style="margin-left:10px;">Delete node</button><br><br>');
     $('#button_delete_node').click(function() {
         XMPP.delete_node(data.id);
