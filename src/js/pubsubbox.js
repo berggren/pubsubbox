@@ -548,15 +548,6 @@ $(document).ready(function() {
         $("#login-form").fadeIn();
     });
 
-    $('#login-button').click(function() {
-        $(document).trigger('connect', {
-                jid: $('#jid').val().toLowerCase(),
-                password: $('#password').val()
-        });
-        $('#login-screen').hide();
-        $('#login_spinner').show();
-    });
-
     $('#create-node-button').click(function() {
         $("#add-node-modal").modal('hide');
         $(document).trigger('create_node_whitelist', {
@@ -595,13 +586,19 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
+    /*
     $('#login-screen').hide();
     $('#login_spinner').show();
+    */
     $.getScript(XMPP.CONFIG_FILE, function(){
-        $(document).trigger('connect', {
-            jid: XMPPConfig.jid,
-            password: XMPPConfig.password,
-            pubsubservice: XMPPConfig.pubsubservice
-        });
+        $('#login-button').click(function() {
+            $(document).trigger('connect', {
+                jid: XMPPConfig.jid,
+                pubsubservice: XMPPConfig.pubsubservice,
+                password: $('#password').val()
+            });
+            $('#login-screen').hide();
+            $('#login_spinner').show();
+        })
     });
 });
