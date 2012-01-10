@@ -49,9 +49,10 @@ or implied, of NORDUnet A/S.
         <div class="row">
             <div class="span10">
                 <br><br><br><br>
-                <h1 class="left">pubsub in a box</h1>
-                <br><br><br>
+                <h1>pubsub in a box</h1>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae odio lorem, ut scelerisque mi. Fusce velit magna, dignissim sed commodo non, facilisis in elit. Sed porta sem et odio iaculis iaculis. Aenean aliquam dui ac felis molestie cursus. Fusce ac ligula non quam lacinia tincidunt. Cras ut nisl at ante euismod euismod dignissim dapibus felis. Nunc consectetur lectus id est varius scelerisque. Morbi purus neque, eleifend vel iaculis aliquet, fermentum vitae dui. Nulla in ipsum nisi. Fusce sed nisi et nisi dictum feugiat.</p>
+                <br>
+                <p id="conn-fail" class="hidden red">Oops, something isn't right. Check your credentials and try again!</p>
                 <br>
             </div>
         </div>
@@ -62,17 +63,18 @@ or implied, of NORDUnet A/S.
             <div class="span7">
                 <div id="login-form" class="hidden">
                     <form>
-                        <label for="xlInput">Username</label>
+                        <label id="username-label">Username</label>
                         <div class="input">
                             <input id="jid" size="30" type="text" />
                         </div>
                         <br>
-                        <label for="xlInput">Password</label>
+                        <label id="password-label">Password</label>
                         <div class="input">
                             <input id="password" size="30" type="password" />
                         </div>
+                        <br>
+                        <input type="button" value="Login" id="login-button" style="margin-left:150px;" class="btn primary">
                     </form>
-                    <button value="Login" id="login-button" style="margin-left:150px;" class="btn primary">Login</button>
                 </div>
             </div>
         </div>
@@ -97,7 +99,7 @@ or implied, of NORDUnet A/S.
                 <li class="active" id="manage_tab"><a id="manage_link" href="#manage">Manage</a></li>
                 <li id="discovery_tab"><a id="discovery_link" href="#discovery">Discovery</a></li>
                 <li id="activities_tab"><a id="activities_link" href="#activities">Activity Stream</a></li>
-                <li id="notification_tab"><a id="notification_link" href="#notification">Notifications <span class="label important hidden" id="notification_count">0</span></a></li>
+                <li id="notification_tab"><a id="notification_link" href="#notification">Notifications <span class="red bold hidden" id="notification_count">0</span></a></li>
             </ul>
 
             <div class="span8 scroll" id="roster_container">
@@ -138,7 +140,7 @@ or implied, of NORDUnet A/S.
     </div>
     <div class="modal-body">
         <form>
-            <label for="xlInput">Name</label>
+            <label>Name</label>
             <div class="input">
                 <input class="xlarge" id="node" size="30" type="text" />
             </div>
@@ -156,7 +158,7 @@ or implied, of NORDUnet A/S.
         </div>
         <div class="modal-body">
             <form>
-                <label for="xlInput">jid</label>
+                <label>jid</label>
                 <div class="input">
                     <input class="xlarge" id="contact" size="30" type="text" />
                 </div>
@@ -168,7 +170,7 @@ or implied, of NORDUnet A/S.
     </div>
 
 
-<div id="login_spinner" class="hide center vcenter">
+<div id="login-spinner" class="hide center vcenter">
     &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner.gif" />
 </div>
 </div>

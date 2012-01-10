@@ -27,8 +27,6 @@ or implied, of NORDUnet A/S.
  */
 
 var XMPP = {
-    /* Set the relative path to the configuration file */
-    CONFIG_FILE: 'js/pubsub_config.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -46,6 +44,10 @@ var XMPP = {
     jid_without_at: function(jid) {
         return Strophe.getBareJidFromJid(jid)
         .replace(/@/g, " ");
+    },
+
+    pubsub_domain: function(service) {
+        return service.replace(/pubsub\./g, '');
     },
 
     on_add_to_whitelist: function(nodeID, jid) {
@@ -120,11 +122,15 @@ var XMPP = {
                 l.push($(this).attr('node'));
             }
         });
+        if (l.length < 1) {
+            return;
+        }
         XMPP.disco_nodes[service] = l;
-        $('#discovery').append('<h3>' + service + '</h3>');
+        $('#discovery').append('<h3>' + XMPP.pubsub_domain(service) + '</h3>');
         for (var n in l) {
             $('#discovery').append('<span id="' + l[n] + '-disco">' + l[n] + '</span><span id="' + l[n] + '-disco-state" class="label success right">subscribe&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>');
         }
+        $('#discovery').append('<hr>');
         var subscriptionIQ =  $iq({to: service, type: 'get'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
             .c('subscriptions');
@@ -153,7 +159,7 @@ var XMPP = {
             $('#notification_count').hide();
             $('#subscription_request').hide()
         } else {
-            $('#notification_count').replaceWith('<span class="label important hidden" id="notification_count">' + XMPP.notifications + '</span>');
+            $('#notification_count').replaceWith('<span class="red bold hidden" id="notification_count">' + XMPP.notifications + '</span>');
             $('#notification_count').show();
         }
     },
@@ -278,7 +284,7 @@ var XMPP = {
         image.src = img_src;
         var jid = $(iq).attr('from');
         var name = vCard.find('FN').text() || jid;
-        $("#fullname").text(name);
+        $("#fullname").text(Strophe.getNodeFromJid(name));
     },
 
     on_pubsub_item: function(iq) {
@@ -335,7 +341,7 @@ var XMPP = {
                 var elem = $('<div class="box_roster left" id="' + id + '-node_info">' +
                     '<span class="' + id + '-canvas"' + '></span>' +
                     '<span>' + name1 + '<br>' + name2 + '</span>' +
-                    '<div class="vcard_remove hidden" id="remove_from_whitelist"></div>' + '</div>')
+                    '<div class="vcard_remove hidden" id="remove_from_whitelist"></div>' + '</div>');
                 $('#node_info_whitelist').append(elem);
                 $(elem).mouseenter(function() {
                     $(elem).find('#remove_from_whitelist').show()
@@ -395,20 +401,29 @@ var XMPP = {
 $(document).bind('connect', function(ev, data) {
     var conn = new Strophe.Connection("/http-bind");
 
-    if (XMPPConfig.debug === true) {
+//    if (XMPPConfig.debug === true) {
         conn.xmlInput = function (body) {
             console.log(body);
         };
         conn.xmlOutput = function (body) {
             console.log(body);
         };
-    }
-
+ //   }
     XMPP.my_jid = data.jid;
     XMPP.pubsubservice = data.pubsubservice;
     conn.connect(data.jid, data.password, function(status) {
         if (status === Strophe.Status.CONNECTED) {
             $(document).trigger('connected');
+        } else if (status === Strophe.Status.CONNECTING) {
+            $('#conn-fail').hide();
+        } else if (status === Strophe.Status.AUTHFAIL) {
+            $('#login-screen').show();
+            $('#login-spinner').hide();
+            $('#conn-fail').show();
+        } else if (status === Strophe.Status.CONNFAIL) {
+            $('#login-screen').show();
+            $('#login-spinner').hide();
+            $('#conn-fail').show();
         } else if (status === Strophe.Status.DISCONNECTED) {
             $(document).trigger('disconnected');
         }
@@ -417,7 +432,7 @@ $(document).bind('connect', function(ev, data) {
 });
 
 $(document).bind('connected', function () {
-    $('#login_spinner').hide();
+    $('#login-spinner').hide();
     $('#main-screen').toggle("fast");
     $('#label-online').toggle("fast");
     var rosterIQ = $iq({type: 'get'})
@@ -586,19 +601,13 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
-    /*
-    $('#login-screen').hide();
-    $('#login_spinner').show();
-    */
-    $.getScript(XMPP.CONFIG_FILE, function(){
-        $('#login-button').click(function() {
-            $(document).trigger('connect', {
-                jid: XMPPConfig.jid,
-                pubsubservice: XMPPConfig.pubsubservice,
-                password: $('#password').val()
-            });
-            $('#login-screen').hide();
-            $('#login_spinner').show();
-        })
-    });
+    $('#login-button').click(function() {
+        $(document).trigger('connect', {
+            jid: $('#jid').val(),
+            pubsubservice: 'pubsub.klutt.se',
+            password: $('#password').val()
+        });
+        $('#login-screen').hide();
+        $('#login-spinner').show();
+    })
 });

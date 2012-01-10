@@ -136,3 +136,8 @@ canvas {
     height: 14px;
     background:#fff url('/img/close.png');
 }
+
+.red {
+    color: red;
+    font-weight: bold;
+}
