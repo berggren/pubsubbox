@@ -1,0 +1,60 @@
+body {
+background: #EFEFEF;
+background-color: #EFEFEF;
+font: 11px 'lucida grande', tahoma, verdana, arial, sans-serif;
+color: #666;
+margin-bottom: 20px;
+overflow: hidden;
+}
+
+#roster {
+background: #333;
+border: solid 1px #464646;
+position: absolute;
+top: 0px;
+right: 0px;
+width: 250px;
+font-size: 11px;
+height: 100%;
+overflow: hidden;
+border-image: initial;
+}
+
+#roster div {
+height: 30px;
+display: block;
+color: #CCC;
+text-decoration: none;
+padding: 10px 10px;
+border-bottom: groove 2px #555;
+text-shadow: 1px 1px #222;
+-moz-text-shadow: 1px 1px #222;
+-webkit-text-shadow: 1px 1px #222;
+}
+
+#nodes {
+margin-right: 295px;
+margin-bottom: 40px;
+width:700px;
+float:right;
+height:300px;
+text-align:center;
+}
+
+.hide {
+    display: none;
+}
+
+.left {
+    float:left;
+}
+
+.quiet {
+    color:#666;
+    font-size: 0.9em;
+}
+
+canvas {
+    background:#444;
+}
+
