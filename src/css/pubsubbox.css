@@ -1,39 +1,49 @@
 body {
-background: #EFEFEF;
-font: 11px 'lucida grande', tahoma, verdana, arial, sans-serif;
-color: #666;
-margin:50px 0px; padding:0px;
+    background: #EFEFEF;
+    font: 11px 'lucida grande', tahoma, verdana, arial, sans-serif;
+    color: #000;olor: #666;
+    margin:150px 0px;
+    padding:0px;
 }
 
 #roster {
-background: #333;
-border: solid 1px #464646;
-position: absolute;
-top: 0px;
-right: 0px;
-width: 250px;
-font-size: 11px;
-border-image: initial;
-height:100%;
+    background: #333;
+    border: solid 1px #464646;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 250px;
+    font-size: 11px;
+    border-image: initial;
+    height:100%;
 }
 
 #roster div {
-height: 30px;
-display: block;
-color: #CCC;
-text-decoration: none;
-padding: 10px 10px;
-border-bottom: groove 2px #555;
-text-shadow: 1px 1px #222;
--moz-text-shadow: 1px 1px #222;
--webkit-text-shadow: 1px 1px #222;
+    height: 30px;
+    display: block;
+    color: #CCC;
+    text-decoration: none;
+    padding: 10px 10px;
+    border-bottom: groove 2px #555;
+    text-shadow: 1px 1px #222;
+    -moz-text-shadow: 1px 1px #222;
+    -webkit-text-shadow: 1px 1px #222;
 }
 
 #nodes {
-    right:400px;
-    width:700px;
-    text-align:center;
+    width: 500px;
+    margin:0px auto;
     position: fixed;
+    right:300px;
+}
+
+.node {
+    width:100px;
+    height:100px;
+    padding:5px;
+    text-align:center;
+    background: #e0e0e0;
+    margin-right:5px;
 }
 
 .hide {

@@ -304,15 +304,15 @@ var XMPP = {
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') === "owner" && $(this).attr('affiliation') != 'outcast') {
                 if (XMPP.nodes[$(this).attr('node')]) {
-                    var elem = $('<div class="box_node drop left" id="' +
+                    var elem = $('<div class="node drop left" id="' +
                                     $(this).attr('node') +
                                     '""><strong>' + XMPP.nodes[$(this).attr('node')] +
                                     '</strong><br><br></div>');
                     $("#" + $(this).attr('node')).remove();
                     $(document).trigger('node_subscriber_count', {id: $(elem).attr('id')});
-                    $('#pubsub').append(elem);
+                    $('#nodes').append(elem);
                     $(elem).click(function() {
-                        $('.box_node').removeClass('highlight');
+                        $('.node').removeClass('highlight');
                         $(elem).addClass('highlight');
                         $(document).trigger('node_info', {id: $(elem).attr('id')});
                     });
@@ -604,9 +604,11 @@ $(document).ready(function() {
 
     $('#login-button').click(function() {
         $(document).trigger('connect', {
-            jid: $('#jid').val(),
+            //jid: $('#jid').val(),
+            //password: $('#password').val()
+            jid: 'jbn@red.local',
+            password: 'hej123',
             pubsubservice: 'pubsub.red.local',
-            password: $('#password').val()
         });
         $('#login-screen').hide();
         $('#login-spinner').show();
