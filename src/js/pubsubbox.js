@@ -82,7 +82,7 @@ var XMPP = {
     },
 
     on_roster: function(iq) {
-        $("#roster").empty();
+        //$("#roster").empty();
         $(iq).find('item').each(function() {
             var subscription = $(this).attr('subscription');
             if (subscription === 'both' || subscription === 'from') {
@@ -220,7 +220,7 @@ var XMPP = {
         var jid = $(iq).attr('from');
         var id = XMPP.jid_to_id(jid);
         var idAvatar = id + '-avatar';
-        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="30" height="30"></canvas><br>');
+        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="30" height="30"></canvas>');
         var img = vCard.find('BINVAL').text();
         var type = vCard.find('TYPE').text();
         var img_src = 'data:'+type+';base64,'+img;
@@ -233,7 +233,7 @@ var XMPP = {
         $('.drag').draggable({
                                  helper: "clone",
                                  appendTo: "body",
-                                 containment: "html",
+                                 containment: "body",
                                  opacity: "0.85",
                                  revert: false,
                                  revertDuration: 100,
@@ -413,7 +413,7 @@ $(document).bind('connect', function(ev, data) {
     XMPP.my_jid = data.jid;
     XMPP.pubsubservice = data.pubsubservice;
     conn.connect(data.jid, data.password, function(status) {
-        if (status === Strophe.Status.CONNECTED) {
+        if    (status === Strophe.Status.CONNECTED) {
             $(document).trigger('connected');
         } else if (status === Strophe.Status.CONNECTING) {
             $('#conn-fail').hide();

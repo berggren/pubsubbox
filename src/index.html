@@ -11,31 +11,38 @@
 <body>
 
 
-
-<div id="nodes">
-    <h1 style="color:#555;font-size:3em;">pubsubbox</h1>
-    <br>
-    <div id="login-screen">
-        <div id="login-form">
-            <form>
-                <label id="username-label">Username</label>
-                <div class="input">
-                    <input id="jid" size="30" type="text" />
-                </div>
-                <br>
-                <label id="password-label">Password</label>
-                <div class="input">
-                    <input id="password" size="30" type="password" />
-                </div>
-                <br>
-                <input type="button" value="Login" id="login-button" style="margin-left:150px;" class="btn primary">
-            </form>
-        </div>
+<div id="login-screen">
+    <div id="login-form">
+        <form>
+            <label id="username-label">Username</label>
+            <div class="input">
+                <input id="jid" size="30" type="text" />
+            </div>
+            <br>
+            <label id="password-label">Password</label>
+            <div class="input">
+                <input id="password" size="30" type="password" />
+            </div>
+            <br>
+            <input type="button" value="Login" id="login-button" style="margin-left:150px;" class="btn primary">
+        </form>
     </div>
 </div>
-<div id="roster"></div>
-<div id="login-spinner" class="hide center vcenter">
-    &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner2.gif" />
+
+<div id="nodes">
+    <h1 style="color:#555;font-size:3em;">peerings</h1>
+    <br>
+    <div id="login-spinner" class="hide center vcenter">
+        &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner2.gif" />&nbsp;&nbsp;Connecting..
+    </div>
+</div>
+
+<div id="roster">
+    <div><br>Peerings</div>
+    <div><br>Stream</div>
+    <div><br>Notifications</div>
+    <div><br>Discovery</div>
+
 </div>
 
 </body>
