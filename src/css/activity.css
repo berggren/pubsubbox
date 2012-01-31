@@ -1,0 +1,14 @@
+body {
+    margin:10px 0px; padding:0px;
+    text-align:center;
+    overflow: hidden;
+}
+
+#activities {
+    width:500px;
+    margin:0px auto;
+    text-align:left;
+    padding:15px;
+    height:440px;
+    overflow: hidden;
+}
