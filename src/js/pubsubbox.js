@@ -605,7 +605,7 @@ $(document).ready(function() {
     $('#login-button').click(function() {
         $(document).trigger('connect', {
             jid: $('#jid').val(),
-            pubsubservice: 'pubsub.klutt.se',
+            pubsubservice: 'pubsub.red.local',
             password: $('#password').val()
         });
         $('#login-screen').hide();
