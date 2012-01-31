@@ -94,9 +94,10 @@ var XMPP = {
                 var splitName = name.split(" ");
                 var name1 = splitName[0] || '';
                 var name2 = splitName[1] || '';
-                var elem = $('<div class="drag box_roster left" jid="' + jid + '" id="' + id + '">' +
-                    '<span class="' + id + '-canvas"' + '></span>' +
-                    '<span>' + name1 + '<br>' + name2 + '</span></div>');
+                var elem = $('<div class="drag" jid="' + jid + '" id="' + id + '">' +
+                    '<span class="' + id + '-canvas left avatar"' + '></span>' +
+                    '<span style="margin-left:10px;padding-top:5px;">' + name + '</span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
+
                 $('#roster').append(elem);
                 var vCardIQ = $iq({to: jid, type: 'get'})
                     .c('vCard', {xmlns: 'vcard-temp'});
@@ -219,14 +220,14 @@ var XMPP = {
         var jid = $(iq).attr('from');
         var id = XMPP.jid_to_id(jid);
         var idAvatar = id + '-avatar';
-        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="48" height="48"></canvas><br>');
+        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="30" height="30"></canvas><br>');
         var img = vCard.find('BINVAL').text();
         var type = vCard.find('TYPE').text();
         var img_src = 'data:'+type+';base64,'+img;
         var ctx = $('#'+idAvatar).get(0).getContext('2d');
         var image = new Image();
         image.onload = function() {
-            ctx.drawImage(image,0,0, 48, 48);
+            ctx.drawImage(image,0,0, 30, 30);
         };
         image.src = img_src;
         $('.drag').draggable({
@@ -610,4 +611,5 @@ $(document).ready(function() {
         $('#login-screen').hide();
         $('#login-spinner').show();
     })
+
 });
