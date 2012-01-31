@@ -34,7 +34,7 @@ var XMPP = {
     domains: [],
     notifications: 0,
     disco_nodes: {},
-    pubsubservice: 'pubsub.klutt.se',
+    pubsubservice: 'pubsub.red.local',
 
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
