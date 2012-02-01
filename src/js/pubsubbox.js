@@ -528,35 +528,31 @@ $(document).bind('change_tab', function(event, data) {
 });
 
 $(document).bind('manage_tab', function(event) {
-    $("#roster_container").show();
-    $("#nodes_container").show();
-    $("#activities_container").hide();
-    $("#notification_container").hide();
-    $("#discovery_container").hide();
+    $("#nodes").fadeIn('fast');
+    $("#discovery").hide();
+    $("#activities").hide();
+    $("#notification").hide();
 });
 
 $(document).bind('discovery_tab', function(event) {
-    $("#roster_container").hide();
-    $("#nodes_container").hide();
-    $("#activities_container").hide();
-    $("#notification_container").hide();
-    $("#discovery_container").show();
+    $("#nodes").hide();
+    $("#discovery").fadeIn('fast');
+    $("#activities").hide();
+    $("#notification").hide();
 });
 
 $(document).bind('activities_tab', function(event) {
-    $("#roster_container").hide();
-    $("#nodes_container").hide();
-    $("#notification_container").hide();
-    $("#discovery_container").hide();
-    $("#activities_container").show();
+    $("#nodes").hide();
+    $("#discovery").hide();
+    $("#activities").fadeIn('fast');
+    $("#notification").hide();
 });
 
 $(document).bind('notification_tab', function(event) {
-    $("#roster_container").hide();
-    $("#nodes_container").hide();
-    $("#activities_container").hide();
-    $("#discovery_container").hide();
-    $("#notification_container").show();
+    $("#nodes").hide();
+    $("#discovery").hide();
+    $("#activities").hide();
+    $("#notification").fadeIn('fast');
 });
 
 $(document).ready(function() {
@@ -605,13 +601,13 @@ $(document).ready(function() {
     $('#login-button').click(function() {
         $(document).trigger('connect', {
             //jid: $('#jid').val(),
-            //password: $('#password').val()
-            jid: 'jbn@red.local',
-            password: 'hej123',
-            pubsubservice: 'pubsub.red.local',
+            password: $('#password').val(),
+            jid: 'jbn@klutt.se',
+            //password: '.blah123',
+            pubsubservice: 'pubsub.klutt.se'
         });
         $('#login-screen').hide();
-        $('#login-spinner').show();
+        $('#login-spinner').fadeIn();
     })
 
 });

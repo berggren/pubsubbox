@@ -2,7 +2,7 @@ body {
     background: #EFEFEF;
     font: 11px 'lucida grande', tahoma, verdana, arial, sans-serif;
     color: #000;olor: #666;
-    margin:100px 0px;
+    margin:30px 0px;
     padding:0px;
 }
 
@@ -28,9 +28,23 @@ body {
     text-shadow: 1px 1px #222;
     -moz-text-shadow: 1px 1px #222;
     -webkit-text-shadow: 1px 1px #222;
+    background: #333;
+
 }
 
-#nodes {
+.roster-menu-item {
+    height: 10px;
+    display: block;
+    color: #CCC;
+    text-decoration: none;
+    padding: 10px 10px;
+    border-bottom: groove 2px #555;
+    text-shadow: 1px 1px #222;
+    -moz-text-shadow: 1px 1px #222;
+    -webkit-text-shadow: 1px 1px #222;
+}
+
+#nodes, #discovery, #activities, #notification {
     width: 500px;
     margin:0px auto;
     position: fixed;
