@@ -5,7 +5,10 @@
     <script src='js/jquery-1.7.1.min.js'></script>
     <script src='js/jquery-ui-1.8.16.min.js'></script>
     <script src='js/strophe-1.0.2.min.js'></script>
+    <script src='js/bootstrap-transition-2.0.2.js'></script>
+    <script src='js/bootstrap-modal-2.0.2.js'></script>
     <script src='js/pubsubbox.js'></script>
+    <link rel='stylesheet' href='css/bootstrap-2.0.2.min.css'>
     <link rel='stylesheet' href='css/pubsubbox.css'>
 </head>
 <body>
@@ -28,28 +31,31 @@
     </div>
 </div>
 
+<div id="menu">
+    <a href="#" class="menu" id="manage_link">Boxes</a>
+    <a href="#" class="menu" id="discovery_link">Discovery</a>
+    <a href="#" class="menu" id="activities_link">Stream</a>
+    <a href="#" class="menu" id="notification_link">Notifications</a>
+    <i class="icon-trash"></i>
+    <i class="icon-plus-sign" id="add-node"></i>
+</div>
+<br>
+
 <div id="nodes">
     <br>
-    <div id="add_node" class="hide" style="float:left;">
-        <br>
-        <h1>Add</h1>
-    </div>
+    <br>
     <div id="login-spinner" class="hide center vcenter">
         &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner.gif" />&nbsp;&nbsp;Connecting..
     </div>
 </div>
 
-<div id="menu">
-    <a href="#" id="manage_link">Boxes</a>
-    <a href="#" id="discovery_link">Discovery</a>
-    <a href="#" id="activities_link">Stream</a>
-    <a href="#" id="notification_link">Notifications</a>
-</div>
 
 <div id="roster">
 </div>
 
 <div id="discovery" class="hide">
+    <br>
+    <br>
     <h1 style="color:#555;font-size:3em;">Discovery</h1>
 </div>
 
@@ -61,6 +67,23 @@
     <h1 style="color:#555;font-size:3em;">Notifications</h1>
 </div>
 
+<div id="add-node-modal" class="modal fade hide">
+    <div class="modal-header">
+        <h3>Create a new box</h3>
+    </div>
+    <div class="modal-body">
+        <p>
+            You can create new boxes to establish information peerings. Drag & drop from your contactlist the persons or organizations you like to share with.
+        </p>
+        <form class="form">
+            <label><b>Name your new box</b></label>
+            <input id="node" size="30" type="text" />
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" id="create-node-button">Create</button>
+    </div>
+</div>
 
 </body>
 </html>

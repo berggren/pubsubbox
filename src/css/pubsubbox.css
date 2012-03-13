@@ -1,8 +1,7 @@
 body {
     background: #EFEFEF;
-    background: #fff;
     font: 11px 'lucida grande', tahoma, verdana, arial, sans-serif;
-    color: #000;olor: #666;
+    color: #333;
     margin:30px 0px;
     padding:0px;
 }
@@ -30,13 +29,6 @@ body {
     -moz-text-shadow: 1px 1px #222;
     -webkit-text-shadow: 1px 1px #222;
     background: #333;
-
-}
-
-#menu {
-    right:300px;
-    top:5px;
-    position: absolute;
 }
 
 .roster-menu-item {
@@ -51,11 +43,15 @@ body {
     -webkit-text-shadow: 1px 1px #222;
 }
 
-#nodes, #discovery, #activities, #notification {
+#nodes, #discovery, #activities, #notification, #menu {
     width: 500px;
     margin:0px auto;
     position: fixed;
     right:300px;
+}
+
+.menu {
+    margin-right:10px;
 }
 
 .node {
@@ -65,8 +61,8 @@ body {
     text-align:center;
     background: #e0e0e0;
     background: #f5f5f5;
-    margin-right:5px;
-    margin-top:5px;
+    margin-right:7px;
+    margin-top:7px;
     border:1px solid silver;
 }
 

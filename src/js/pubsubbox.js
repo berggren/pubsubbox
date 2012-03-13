@@ -376,7 +376,7 @@ var XMPP = {
                 subscribers =  subscribers + 1;
             }
         });
-        $("#" + node).append('<h1 class="count">' + subscribers + '</h1>');
+        $("#" + node).append('<br><h1 class="count">' + subscribers + '</h1>');
     },
 
     on_node_update_subscriber_count: function(iq) {
@@ -562,6 +562,10 @@ $(document).bind('notification_tab', function(event) {
 $(document).ready(function() {
     $('#connect-button').click(function() {
         $("#login-form").fadeIn();
+    });
+
+    $('#add-node').click(function() {
+        $("#add-node-modal").modal('show');
     });
 
     $('#create-node-button').click(function() {
