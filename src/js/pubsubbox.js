@@ -26,7 +26,10 @@ authors and should not be interpreted as representing official policies, either 
 or implied, of NORDUnet A/S.
  */
 
+
+
 var XMPP = {
+    CONFIG_FILE: 'js/config.js',
     connection: null,
     my_jid: null,
     nodes: {},
@@ -73,7 +76,9 @@ var XMPP = {
     },
 
     delete_node: function(nodeID) {
-        console.log("delete node " + nodeID);
+        if (XMPPConfig.debug) {
+            console.log("delete node " + nodeID);
+        }
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('delete', {node:nodeID});
@@ -82,7 +87,6 @@ var XMPP = {
     },
 
     on_roster: function(iq) {
-        //$("#roster").empty();
         $(iq).find('item').each(function() {
             var subscription = $(this).attr('subscription');
             if (subscription === 'both' || subscription === 'from') {
@@ -393,8 +397,8 @@ var XMPP = {
     },
 
     on_error: function(iq) {
-        if (XMPPConfig.debug === true) {
-            console.log('ERROR, take a look ast the followiung error-stanza:');
+        if (XMPPConfig.debug) {
+            console.log('ERROR, take a look at the followiung error-stanza:');
             console.log(iq);
         }
     }
@@ -402,15 +406,14 @@ var XMPP = {
 
 $(document).bind('connect', function(ev, data) {
     var conn = new Strophe.Connection("/http-bind");
-
-//    if (XMPPConfig.debug === true) {
+    if (XMPPConfig.debug) {
         conn.xmlInput = function (body) {
             console.log(body);
         };
         conn.xmlOutput = function (body) {
             console.log(body);
         };
- //   }
+    }
     XMPP.my_jid = data.jid;
     XMPP.pubsubservice = data.pubsubservice;
     conn.connect(data.jid, data.password, function(status) {
@@ -599,16 +602,16 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
-    $('#login-button').click(function() {
-        $(document).trigger('connect', {
-            //jid: $('#jid').val(),
-            //password: $('#password').val(),
-            jid: 'user@example.com',
-            password: 'secret',
-            pubsubservice: 'pubsub.klutt.se'
-        });
+    //$('#login-button').click(function() {
         $('#login-screen').hide();
         $('#login-spinner').fadeIn();
-    })
+        $.getScript(XMPP.CONFIG_FILE, function(){
+            $(document).trigger('connect', {
+                jid: XMPPConfig.jid,
+                password: XMPPConfig.password,
+                pubsubservice: XMPPConfig.pubsubservice
+            });
 
+        })
+    //})
 });
