@@ -301,13 +301,14 @@ var XMPP = {
     },
 
     on_affiliation: function(iq) {
+        $('#add_node').show();
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') === "owner" && $(this).attr('affiliation') != 'outcast') {
                 if (XMPP.nodes[$(this).attr('node')]) {
                     var elem = $('<div class="node drop left" id="' +
                                     $(this).attr('node') +
-                                    '""><strong>' + XMPP.nodes[$(this).attr('node')] +
-                                    '</strong><br><br></div>');
+                                    '""><br><strong>' + XMPP.nodes[$(this).attr('node')] +
+                                    '</strong><br></div>');
                     $("#" + $(this).attr('node')).remove();
                     $(document).trigger('node_subscriber_count', {id: $(elem).attr('id')});
                     $('#nodes').append(elem);
@@ -601,9 +602,9 @@ $(document).ready(function() {
     $('#login-button').click(function() {
         $(document).trigger('connect', {
             //jid: $('#jid').val(),
-            password: $('#password').val(),
-            jid: 'jbn@klutt.se',
-            //password: '.blah123',
+            //password: $('#password').val(),
+            jid: 'user@example.com',
+            password: 'secret',
             pubsubservice: 'pubsub.klutt.se'
         });
         $('#login-screen').hide();
