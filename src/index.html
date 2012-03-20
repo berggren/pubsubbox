@@ -15,56 +15,70 @@
 
 <div id="login-screen">
     <div id="login-form">
-        <form>
-            <label id="username-label">Username</label>
-            <div class="input">
-                <input id="jid" size="30" type="text" />
-            </div>
-            <br>
+        <h1 style="margin-left:70px;">pubsubbox</h1>
+        <br><br>
+        <form class="form-inline">
+            <label class="control-label">Username</label>
+            <input id="jid" size="30" type="text" />
+            <br><br>
             <label id="password-label">Password</label>
-            <div class="input">
-                <input id="password" size="30" type="password" />
-            </div>
-            <br>
-            <input type="button" value="Login" id="login-button" style="margin-left:150px;" class="btn primary">
+            <input id="password" size="30" type="password" />
+            <br><br>
+            <input type="button" value="Login" id="login-button" style="margin-right:-230px;" class="btn btn-primary">
         </form>
     </div>
 </div>
+
+<div id="login-spinner" class="hide center vcenter">
+    &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner.gif" />&nbsp;&nbsp;Connecting..
+</div>
+
+<div id="main-screen" class="hide">
 
 <div id="menu">
     <a href="#" class="menu" id="manage_link">Boxes</a>
     <a href="#" class="menu" id="discovery_link">Discovery</a>
     <a href="#" class="menu" id="activities_link">Stream</a>
-    <a href="#" class="menu" id="notification_link">Notifications</a>
-    <i class="icon-trash"></i>
-    <i class="icon-plus-sign" id="add-node"></i>
+    <a href="#" class="menu hide" id="notification_link"><span id="notification_count" class="label label-important right" style="margin-left:10px;margin-right:7px;">0</span></a>
+    <a href="#" id="add-node"><span class="right" style="margin-right:9px;"><i class="icon-plus-sign"></i> Add box</span></a>
 </div>
 <br>
 
 <div id="nodes">
     <br>
     <br>
-    <div id="login-spinner" class="hide center vcenter">
-        &nbsp;&nbsp;&nbsp;&nbsp;<img src="img/spinner.gif" />&nbsp;&nbsp;Connecting..
-    </div>
 </div>
 
 
 <div id="roster">
+    <div style="height:20px;">
+        <span class="left"><b>My contacts</b></span>
+        <a href="#" id="add-contact"><span class="right" style="margin-right:9px;"><i class="icon-plus icon-white"></i><i class="icon-user icon-white"></i></span></a>
+    </div>
+</div>
+
+<div class="hide" id="roster2">
 </div>
 
 <div id="discovery" class="hide">
     <br>
     <br>
-    <h1 style="color:#555;font-size:3em;">Discovery</h1>
+    <div class="alert alert-info">
+        <p>
+            Discover all the boxes you are authorized to subscribe to. This works by sending out a discovery query to all the different domains in your contactlist, and the result is presented here.
+
+        </p>
+    </div>
 </div>
 
 <div id="activities" class="hide">
-    <h1 style="color:#555;font-size:3em;">Stream</h1>
+    <br>
+    <br>
 </div>
 
 <div id="notification" class="hide">
-    <h1 style="color:#555;font-size:3em;">Notifications</h1>
+    <br>
+    <br>
 </div>
 
 <div id="add-node-modal" class="modal fade hide">
@@ -73,7 +87,7 @@
     </div>
     <div class="modal-body">
         <p>
-            You can create new boxes to establish information peerings. Drag & drop from your contactlist the persons or organizations you like to share with.
+            Create a new box! Drag&drop contacts into the box to start sharing.
         </p>
         <form class="form">
             <label><b>Name your new box</b></label>
@@ -83,6 +97,27 @@
     <div class="modal-footer">
         <button class="btn btn-primary" id="create-node-button">Create</button>
     </div>
+</div>
+
+<div id="add-contact-modal" class="modal fade hide">
+    <div class="modal-header">
+        <h3><i class="icon-user" style="margin-top:3px;"></i> Add contact</h3>
+    </div>
+    <div class="modal-body">
+        <p>
+            Enter a username in the form of <i>user@domain</i>. An invitation will be sent to the user and when/if this invitation is accepted, the user will be added to your contactlist.
+        </p>
+        <form class="form">
+            <label><b>User to add (<i>ex. john@example.com</i>)</b></label>
+            <input id="contact" size="30" type="text" />
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" id="create-contact-button">Add contact</button>
+    </div>
+</div>
+
+
 </div>
 
 </body>

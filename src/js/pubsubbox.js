@@ -26,9 +26,10 @@ authors and should not be interpreted as representing official policies, either 
 or implied, of NORDUnet A/S.
  */
 
-
-
 var XMPP = {
+    /*
+        Init
+     */
     CONFIG_FILE: 'js/config.js',
     connection: null,
     my_jid: null,
@@ -38,6 +39,9 @@ var XMPP = {
     notifications: 0,
     disco_nodes: {},
 
+    /*
+        Helper functions
+     */
     jid_to_id: function(jid) {
         return Strophe.getBareJidFromJid(jid)
         .replace(/@/g, "-")
@@ -53,13 +57,9 @@ var XMPP = {
         return service.replace(/pubsub\./g, '');
     },
 
-    on_add_to_whitelist: function(nodeID, jid) {
-        var iq = $iq({to:XMPP.pubsubservice, type:'set'})
-            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
-            .c('affiliations', {node:nodeID})
-            .c('affiliation', {jid:jid, affiliation:'member' });
-        XMPP.connection.sendIQ(iq);
-    },
+    /*
+        XMPP actions
+     */
 
     remove_from_whitelist: function(nodeID, jid) {
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
@@ -69,12 +69,6 @@ var XMPP = {
         XMPP.connection.sendIQ(iq, XMPP.on_remove_from_whitelist(nodeID));
     },
 
-    on_remove_from_whitelist: function(nodeID) {
-        setTimeout(function(){
-            $(document).trigger('node_update_subscriber_count', {id: nodeID});
-        }, 50);
-    },
-
     delete_node: function(nodeID) {
         if (XMPPConfig.debug) {
             console.log("delete node " + nodeID);
@@ -82,11 +76,59 @@ var XMPP = {
         var iq = $iq({to:XMPP.pubsubservice, type:'set'})
             .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
             .c('delete', {node:nodeID});
-        $('#' + nodeID).remove();
+        $('#' + nodeID).fadeOut();
         XMPP.connection.sendIQ(iq, XMPP.on_whitelist);
     },
 
+    subscribe_to_node: function(node, jid, service) {
+        var subscribeIQ =  $iq({to: service, type: 'set'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+            .c('subscribe', {"node": node, "jid": jid});
+        XMPP.connection.sendIQ(subscribeIQ);
+    },
+
+    unsubscribe_from_node: function(node, jid, service) {
+        var unsubscribeIQ =  $iq({to: service, type: 'set'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+            .c('unsubscribe', {"node": node, "jid": jid});
+        XMPP.connection.sendIQ(unsubscribeIQ);
+    },
+
+    update_notification_count: function(plus_or_minus) {
+        console.log("update notification");
+        if (plus_or_minus === 'plus') {
+            XMPP.notifications = XMPP.notifications + 1;
+        } else {
+            XMPP.notifications = XMPP.notifications - 1;
+        }
+        if (XMPP.notifications === 0) {
+            $('#notification_link').hide();
+        } else {
+            $('#notification_count').text(XMPP.notifications)
+            $('#notification_link').show();
+        }
+    },
+
+    /*
+        XMPP event handlers
+     */
+
+    on_add_to_whitelist: function(nodeID, jid) {
+        var iq = $iq({to:XMPP.pubsubservice, type:'set'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
+            .c('affiliations', {node:nodeID})
+            .c('affiliation', {jid:jid, affiliation:'member' });
+        XMPP.connection.sendIQ(iq);
+    },
+
+    on_remove_from_whitelist: function(nodeID) {
+        setTimeout(function(){
+            $(document).trigger('node_update_subscriber_count', {id: nodeID});
+        }, 50);
+    },
+
     on_roster: function(iq) {
+        $('.contact').remove();
         $(iq).find('item').each(function() {
             var subscription = $(this).attr('subscription');
             if (subscription === 'both' || subscription === 'from') {
@@ -98,10 +140,7 @@ var XMPP = {
                 var splitName = name.split(" ");
                 var name1 = splitName[0] || '';
                 var name2 = splitName[1] || '';
-                var elem = $('<div class="drag" jid="' + jid + '" id="' + id + '">' +
-                    '<span class="' + id + '-canvas left avatar"' + '></span>' +
-                    '<span style="margin-left:10px;padding-top:5px;">' + name + '</span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
-
+                var elem = $('<div class="drag contact" jid="' + jid + '" id="' + id + '">' + '<span style="margin-left:10px;padding-top:5px;"">' + name + '</span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
                 $('#roster').append(elem);
                 var vCardIQ = $iq({to: jid, type: 'get'})
                     .c('vCard', {xmlns: 'vcard-temp'});
@@ -112,74 +151,34 @@ var XMPP = {
                     var iq =  $iq({to: service, type: 'get'})
                         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
                         .c('affiliations');
-                    XMPP.connection.sendIQ(iq, XMPP.on_pubsub_disco, XMPP.on_error);
+                    XMPP.connection.sendIQ(iq, XMPP.on_discovery, XMPP.on_error);
                 }
             }
         });
+        console.log("send pres");
         XMPP.connection.send($pres());
     },
 
-    on_pubsub_disco: function(iq) {
-        var service = $(iq).attr('from');
-        var l = [];
-        $(iq).find('affiliation').each(function() {
-            if ($(this).attr('affiliation') === 'member') {
-                l.push($(this).attr('node'));
-            }
-        });
-        if (l.length < 1) {
-            return;
-        }
-        XMPP.disco_nodes[service] = l;
-        $('#discovery').append('<h3>' + XMPP.pubsub_domain(service) + '</h3>');
-        for (var n in l) {
-            $('#discovery').append('<span id="' + l[n] + '-disco">' + l[n] + '</span><span id="' + l[n] + '-disco-state" class="label success right">subscribe&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>');
-        }
-        $('#discovery').append('<hr>');
-        var subscriptionIQ =  $iq({to: service, type: 'get'})
-            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
-            .c('subscriptions');
-        XMPP.connection.sendIQ(subscriptionIQ, XMPP.on_get_subscriptions, XMPP.on_error);
-    },
-
-    on_get_subscriptions: function(iq) {
-        $(iq).find('subscription').each(function(){
-            $('#' + $(this).attr('node') + '-disco-state').replaceWith('<span class="label right">unsubscribe</span>')
-        })
-    },
-
     on_roster_changed: function(iq) {
+        console.log("roster changed");
         var rosterIQ = $iq({type: 'get'})
             .c('query', {xmlns: 'jabber:iq:roster'});
         XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
     },
 
-    update_notification_count: function(plus_or_minus) {
-        if (plus_or_minus === 'plus') {
-            XMPP.notifications = XMPP.notifications + 1;
-        } else {
-            XMPP.notifications = XMPP.notifications - 1;
-        }
-        if (XMPP.notifications === 0) {
-            $('#notification_count').hide();
-            $('#subscription_request').hide()
-        } else {
-            $('#notification_count').replaceWith('<span class="red bold hidden" id="notification_count">' + XMPP.notifications + '</span>');
-            $('#notification_count').show();
-        }
-    },
-
-    on_presence: function(presence)  {
+    on_presence: function(presence) {
+        console.log($(presence).attr('from'));
         var type = $(presence).attr('type');
         var from = $(presence).attr('from');
         var from_bare = Strophe.getBareJidFromJid(from);
         if (type === 'subscribe') {
+            console.log("yeah");
             var id_subscription = XMPP.jid_to_id(from_bare) + '-subscription_request';
             var id_allow = XMPP.jid_to_id(from_bare) + '-subscription_allow';
             var id_deny = XMPP.jid_to_id(from_bare) + '-subscription_deny';
-            var elem = '<tr id="' + id_subscription + '"><td>' + from_bare + '</td><td><button class="btn success" id="' + id_allow + '">Yes</button></td><td><span class="btn error" id="' + id_deny + '">No</span></td></tr>';
-            $('#subscription_request').show();
-            $('#subscription_request_table').append(elem);
+            var elem = '<span id="' + id_subscription + '">' + from_bare + '<span class="right"><a href="#" id="' + id_allow + '"><i class="icon-ok-sign"></i> Approve</a> | <a href="#" id="' + id_deny + '"><i class="icon-remove-sign"></i> Reject</a></span></span>';
+            $('#notification_link').show();
+            $('#notification').append(elem);
 
             XMPP.update_notification_count('plus');
 
@@ -194,6 +193,9 @@ var XMPP = {
                 }));
                 $("#" + id_subscription).remove();
                 XMPP.update_notification_count('minus')
+                var rosterIQ = $iq({type: 'get'})
+                    .c('query', {xmlns: 'jabber:iq:roster'});
+                XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
             });
 
             $('#' + id_deny).click(function() {
@@ -204,18 +206,58 @@ var XMPP = {
                 $("#" + id_subscription).remove();
                 XMPP.update_notification_count('minus')
             });
-
         }
         return true;
     },
 
-    on_message: function(message)  {
+    on_discovery: function(iq) {
+        var service = $(iq).attr('from');
+        var l = [];
+        $(iq).find('affiliation').each(function() {
+            if ($(this).attr('affiliation') === 'member') {
+                l.push($(this).attr('node'));
+            }
+        });
+        if (l.length < 1) {
+            return;
+        }
+        XMPP.disco_nodes[service] = l;
+        $('#discovery').append('<h6>' + XMPP.pubsub_domain(service) + '</h6><br>');
+        for (var n in l) {
+            var node_name_elem = $('<span class="left"><h4>' + l[n] + '</h4></span>');
+            var node_subscribe_elem = $('<a href="#" id="' + l[n] + '-disco-state' + '" class="right" style="margin-top:2px;"><i class="icon-plus-sign"></i> Subscribe</a><br><br>');
+            $('#discovery').append(node_name_elem);
+            $('#discovery').append(node_subscribe_elem);
+            $(node_subscribe_elem).click(function() {
+                var nodeID = l[n];
+                $(this).replaceWith('<span class="quiet right" style="margin-top:2px;">subscribed</span>')
+                XMPP.subscribe_to_node(nodeID, XMPP.my_jid, service);
+            });
+        }
+        var subscriptionIQ =  $iq({to: service, type: 'get'})
+            .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'})
+            .c('subscriptions');
+        XMPP.connection.sendIQ(subscriptionIQ, XMPP.on_get_subscriptions, XMPP.on_error);
+    },
+
+    on_get_subscriptions: function(iq) {
+        $(iq).find('subscription').each(function(){
+            $('#' + $(this).attr('node') + '-disco-state').replaceWith('<span class="quiet right" style="margin-top:2px;">subscribed</span>');
+        })
+    },
+
+    on_pubsub_event: function(message)  {
         var service = $(message).attr('from');
         var node = $(message).find('items').attr('node');
         $(message).find('item').each(function() {
-            var payload = $(this).find('event').text();
-            $('#activities').append('<span class="alert-message warning"><strong>' + service + '</strong> (' + node + ') ' + payload + '</span><br><br>');
+            var payload = $.parseJSON($(this).find('event').text());
+            $('#activities').prepend('<div class="well"><span class="right"><h6>' + service + '</h6></span><span class="left"><b>' + payload.actor + '</b> shared</span><br><br>' + payload.object.hash.sha1 + '</div>');
         });
+        var c = $("#activities").children().length;
+        console.log(c);
+        if (c > 8) {
+            $('#activities div:last').remove().fadeOut();
+        }
         return true;
     },
 
@@ -223,21 +265,17 @@ var XMPP = {
         var vCard = $(iq).find("vCard");
         var jid = $(iq).attr('from');
         var id = XMPP.jid_to_id(jid);
-        var idAvatar = id + '-avatar';
-        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="30" height="30"></canvas>');
+        var idAvatar = id + '-canvas';
         var img = vCard.find('BINVAL').text();
         var type = vCard.find('TYPE').text();
         var img_src = 'data:'+type+';base64,'+img;
-        var ctx = $('#'+idAvatar).get(0).getContext('2d');
-        var image = new Image();
-        image.onload = function() {
-            ctx.drawImage(image,0,0, 30, 30);
-        };
-        image.src = img_src;
+        sessionStorage.setItem(id, img_src);
+        var elem = $('<span class="left"><img width="30" height="30" src="' + img_src + '"></span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span>');
+        $('#' + id).prepend(elem);
         $('.drag').draggable({
                                  helper: "clone",
                                  appendTo: "body",
-                                 containment: "body",
+                                 containment: "nodes",
                                  opacity: "0.85",
                                  revert: false,
                                  revertDuration: 100,
@@ -247,52 +285,7 @@ var XMPP = {
                              });
     },
 
-    on_vcard_node_info: function(iq) {
-        var vCard = $(iq).find("vCard");
-        var jid = $(iq).attr('from');
-        var id = XMPP.jid_to_id(jid) + '-node_info';
-        var idAvatar = id + '-avatar';
-        $('.' + id + '-canvas').append('<canvas id="' + idAvatar + '" width="48" height="48"></canvas><br>');
-        var img = vCard.find('BINVAL').text();
-        var type = vCard.find('TYPE').text();
-        var img_src = 'data:'+type+';base64,'+img;
-        var ctx = $('#'+idAvatar).get(0).getContext('2d');
-        var image = new Image();
-        image.onload = function() {
-            ctx.drawImage(image,0,0, 48, 48);
-        };
-        image.src = img_src;
-        $('.drag').draggable({
-            helper: "clone",
-            appendTo: "body",
-            containment: "html",
-            opacity: "0.85",
-            revert: false,
-            revertDuration: 100,
-            stack: ".drag",
-            cursor: "move",
-            scroll: false
-        });
-    },
-
-
-    on_my_vcard: function(iq) {
-        var vCard = $(iq).find("vCard");
-        var base64Image = vCard.find('BINVAL').text();
-        var type = vCard.find('TYPE').text();
-        var img_src = 'data:'+type+';base64,'+base64Image;
-        var ctx = $('#avatar').get(0).getContext('2d');
-        var image = new Image();
-        image.onload = function() {
-            ctx.drawImage(image,0,0,68,68)
-        };
-        image.src = img_src;
-        var jid = $(iq).attr('from');
-        var name = vCard.find('FN').text() || jid;
-        $("#fullname").text(Strophe.getNodeFromJid(name));
-    },
-
-    on_pubsub_item: function(iq) {
+    on_nodes: function(iq) {
         $(iq).find('item').each(function() {
             if ($(this).attr('node') != "/home") {
                 XMPP.nodes[$(this).attr('node')] = $(this).attr('name');
@@ -317,8 +310,8 @@ var XMPP = {
                     $(document).trigger('node_subscriber_count', {id: $(elem).attr('id')});
                     $('#nodes').append(elem);
                     $(elem).click(function() {
-                        $('.node').removeClass('highlight');
-                        $(elem).addClass('highlight');
+                        $('.node').css({opacity:0.3});
+                        $(elem).css({opacity:1.0});
                         $(document).trigger('node_info', {id: $(elem).attr('id')});
                     });
                     $(".drop").droppable({
@@ -335,20 +328,14 @@ var XMPP = {
     },
 
     on_node_affiliation: function(iq) {
-        $("#spinner").hide();
         $(iq).find('affiliation').each(function() {
             if ($(this).attr('affiliation') != 'owner' && $(this).attr('affiliation') != 'outcast') {
                 var jid = $(this).attr('jid');
-                var id = XMPP.jid_to_id(jid) + '-node_info';
+                var id = XMPP.jid_to_id(jid);
                 var name = XMPP.roster[jid];
-                var splitName = name.split(" ");
-                var name1 = splitName[0] || '';
-                var name2 = splitName[1] || '';
-                var elem = $('<div class="box_roster left" id="' + id + '-node_info">' +
-                    '<span class="' + id + '-canvas"' + '></span>' +
-                    '<span>' + name1 + '<br>' + name2 + '</span>' +
-                    '<div class="vcard_remove hidden" id="remove_from_whitelist"></div>' + '</div>');
-                $('#node_info_whitelist').append(elem);
+                var avatar = sessionStorage.getItem(id);
+                var elem = $('<div jid="' + jid + '" id="' + id + '"><span class="avatar left"><img width="30" height="30" src="' + avatar + '"></span><span style="margin-left:10px;padding-top:5px;">' + name + '</span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
+                $('#roster2').append(elem);
                 $(elem).mouseenter(function() {
                     $(elem).find('#remove_from_whitelist').show()
                 });
@@ -360,10 +347,6 @@ var XMPP = {
                     XMPP.remove_from_whitelist(nodeID, jid);
                     $(this).parent().empty().hide();
                 });
-                var vCardIQ = $iq({to: jid, type: 'get'})
-                    .c('vCard', {xmlns: 'vcard-temp'});
-                XMPP.connection.sendIQ(vCardIQ, XMPP.on_vcard_node_info, XMPP.on_error);
-
             }
         });
     },
@@ -393,7 +376,7 @@ var XMPP = {
     on_create_node_whitelist: function(iq) {
         var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
             .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
-        XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
+        XMPP.connection.sendIQ(pubSubIQ, XMPP.on_nodes, XMPP.on_error);
     },
 
     on_error: function(iq) {
@@ -439,19 +422,16 @@ $(document).bind('connect', function(ev, data) {
 $(document).bind('connected', function () {
     $('#login-spinner').hide();
     $('#main-screen').toggle("fast");
-    $('#label-online').toggle("fast");
     var rosterIQ = $iq({type: 'get'})
         .c('query', {xmlns: 'jabber:iq:roster'});
     var pubSubIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('query', {xmlns: 'http://jabber.org/protocol/disco#items'});
-    var vCardIQ = $iq({type: 'get'})
-        .c('query', {xmlns: 'vcard-temp'});
     XMPP.connection.addHandler(XMPP.on_presence, null, "presence");
-    XMPP.connection.addHandler(XMPP.on_message, null, "message", "headline");
+    XMPP.connection.addHandler(XMPP.on_pubsub_event, null, "message", "headline");
     XMPP.connection.addHandler(XMPP.on_roster_changed, "jabber:iq:roster", "iq", "set");
     XMPP.connection.sendIQ(rosterIQ, XMPP.on_roster);
-    XMPP.connection.sendIQ(pubSubIQ, XMPP.on_pubsub_item, XMPP.on_error);
-    XMPP.connection.sendIQ(vCardIQ, XMPP.on_my_vcard, XMPP.on_error);
+    XMPP.connection.sendIQ(pubSubIQ, XMPP.on_nodes, XMPP.on_error);
+
 });
 
 $(document).bind('disconnected', function () {
@@ -499,28 +479,23 @@ $(document).bind('node_update_subscriber_count', function(event, data) {
 });
 
 $(document).bind('node_info', function(event, data) {
-    $("#roster").hide();
-    $('#node_info_whitelist').empty().show();
-    $("#node_info_buttonlist").empty().show().append('<button id="button_close_node_info" class="btn">&laquo; Back to roster</button>');
-    $("#node_info_buttonlist").append('<button id="button_delete_node" class="btn error" style="margin-left:10px;">Delete node</button><br><br>');
-    $('#button_delete_node').click(function() {
-        XMPP.delete_node(data.id);
-        $('#node_info').empty().hide();
-        $('#node_info_whitelist').empty().hide();
-        $('#node_info_buttonlist').empty().hide();
-        $('.box_node').removeClass('highlight');
-        $("#roster").fadeIn();
-    });
-    $('#button_close_node_info').click(function() {
-        $('#node_info').empty().hide();
-        $('#node_info_whitelist').empty().hide();
-        $('#node_info_buttonlist').empty().hide();
-        $('.box_node').removeClass('highlight');
-        $("#roster").fadeIn();
-    });
+    $('#roster').hide();
+    $('#roster2').empty().show();
+    $('#roster2').append('<div><b style="color:#fff">' + XMPP.nodes[data.id] + '</b><span style="float:right;"><a href="#" id="delete_node"><i class="icon-trash icon-white"></i></a>&nbsp;<a href="#" id="close_node"><i class="icon-remove-circle icon-white"></i></a></span><br><span class="quiet">Members</span></div>');
     var nodeAffiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
         .c('affiliations', {node: data.id});
+    $("#delete_node").click(function() {
+        $('.node').css({opacity:1.0});
+        $("#roster2").hide();
+        $("#roster").fadeIn('fast');
+        XMPP.delete_node(data.id);
+    });
+    $('#close_node').click(function() {
+        $('.node').css({opacity:1.0});
+        $('#roster2').fadeOut('fast');
+        $("#roster").fadeIn('fast');
+    });
     XMPP.connection.sendIQ(nodeAffiliationIQ, XMPP.on_node_affiliation)
 });
 
@@ -532,31 +507,48 @@ $(document).bind('change_tab', function(event, data) {
 });
 
 $(document).bind('manage_tab', function(event) {
-    $("#nodes").fadeIn('fast');
+    $('.node').css({opacity:1.0});
+    $('#roster2').fadeOut('fast');
+    $("#roster").fadeIn('fast');
+    $("#nodes").show();
     $("#discovery").hide();
     $("#activities").hide();
     $("#notification").hide();
+    $("#add-node").show();
 });
 
 $(document).bind('discovery_tab', function(event) {
+    $('.node').css({opacity:1.0});
+    $('#roster2').fadeOut('fast');
+    $("#roster").fadeIn('fast');
     $("#nodes").hide();
     $("#discovery").fadeIn('fast');
     $("#activities").hide();
     $("#notification").hide();
+    $("#add-node").hide();
+
 });
 
 $(document).bind('activities_tab', function(event) {
+    $('.node').css({opacity:1.0});
+    $('#roster2').fadeOut('fast');
+    $("#roster").fadeIn('fast');
     $("#nodes").hide();
     $("#discovery").hide();
     $("#activities").fadeIn('fast');
     $("#notification").hide();
+    $("#add-node").hide();
 });
 
 $(document).bind('notification_tab', function(event) {
+    $('.node').css({opacity:1.0});
+    $('#roster2').fadeOut('fast');
+    $("#roster").fadeIn('fast');
     $("#nodes").hide();
     $("#discovery").hide();
     $("#activities").hide();
     $("#notification").fadeIn('fast');
+    $("#add-node").hide();
 });
 
 $(document).ready(function() {
@@ -568,6 +560,10 @@ $(document).ready(function() {
         $("#add-node-modal").modal('show');
     });
 
+    $('#add-contact').click(function() {
+        $("#add-contact-modal").modal('show');
+    });
+
     $('#create-node-button').click(function() {
         $("#add-node-modal").modal('hide');
         $(document).trigger('create_node_whitelist', {
@@ -575,7 +571,11 @@ $(document).ready(function() {
         });
     });
 
-    $('#add-contact-button').click(function() {
+    $('#create-contact-button').click(function() {
+        $("#add-contact-modal").modal('hide');
+    });
+
+    $('#create-contact-button').click(function() {
         $("#add-contact-modal").modal('hide');
         $(document).trigger('add_contact', {
             jid: $('#contact').val()
@@ -606,16 +606,17 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
-    //$('#login-button').click(function() {
+    $('#login-button').click(function() {
         $('#login-screen').hide();
         $('#login-spinner').fadeIn();
         $.getScript(XMPP.CONFIG_FILE, function(){
             $(document).trigger('connect', {
-                jid: XMPPConfig.jid,
-                password: XMPPConfig.password,
+                jid: $('#jid').val(),
+                password: $('#password').val(),
+                //jid: XMPPConfig.jid,
+                //password: XMPPConfig.password,
                 pubsubservice: XMPPConfig.pubsubservice
             });
-
         })
-    //})
+    })
 });

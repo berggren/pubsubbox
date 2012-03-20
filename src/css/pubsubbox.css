@@ -6,19 +6,36 @@ body {
     padding:0px;
 }
 
-#roster {
+#roster, #roster2 {
     background: #333;
     border: solid 1px #464646;
     position: absolute;
     top: 0px;
-    right: 0px;
+    left: 0px;
     width: 250px;
     font-size: 11px;
     border-image: initial;
     height:100%;
 }
 
+#activities {
+    padding-top:30px;
+}
+
 #roster div {
+    height: 30px;
+    display: block;
+    color: #CCC;
+    text-decoration: none;
+    padding: 10px 10px;
+    border-bottom: groove 2px #555;
+    text-shadow: 1px 1px #222;
+    -moz-text-shadow: 1px 1px #222;
+    -webkit-text-shadow: 1px 1px #222;
+    background: #333;
+}
+
+#roster2 div {
     height: 30px;
     display: block;
     color: #CCC;
@@ -44,10 +61,15 @@ body {
 }
 
 #nodes, #discovery, #activities, #notification, #menu {
-    width: 500px;
+    width: 476px;
     margin:0px auto;
     position: fixed;
-    right:300px;
+    left:300px;
+}
+
+#login-spinner, #login-screen {
+    margin-top:200px;
+    text-align: center;
 }
 
 .menu {
@@ -83,6 +105,10 @@ body {
 
 .left {
     float:left;
+}
+
+.right {
+    float:right;
 }
 
 .quiet {
