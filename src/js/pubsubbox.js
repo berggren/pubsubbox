@@ -338,7 +338,7 @@ var XMPP = {
                 var id = XMPP.jid_to_id(jid);
                 var name = XMPP.roster[jid];
                 var avatar = sessionStorage.getItem(id);
-                var elem = $('<div jid="' + jid + '" id="' + id + '" class="contact"><span class="avatar left"><img width="30" height="30" src="' + avatar + '"></span><span style="margin-left:10px;padding-top:5px;">' + name + '</span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
+                var elem = $('<div jid="' + jid + '" id="' + id + '" class="contact left"><span class="avatar left"><img width="30" height="30" src="' + avatar + '"></span><span style="margin-left:10px;padding-top:5px;">' + name + '</span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
                 $('#roster2').append(elem);
                 $(elem).mouseenter(function() {
                     $(elem).find('#remove_from_whitelist').show()
