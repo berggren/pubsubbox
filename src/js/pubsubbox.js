@@ -140,7 +140,7 @@ var XMPP = {
                 var splitName = name.split(" ");
                 var name1 = splitName[0] || '';
                 var name2 = splitName[1] || '';
-                var elem = $('<div class="drag contact" jid="' + jid + '" id="' + id + '">' + '<span style="margin-left:10px;padding-top:5px;"">' + name + '</span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
+                var elem = $('<div class="drag contact left" jid="' + jid + '" id="' + id + '">' + '<span style="margin-left:10px;padding-top:5px;"">' + name + '</span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
                 $('#roster').append(elem);
                 var vCardIQ = $iq({to: jid, type: 'get'})
                     .c('vCard', {xmlns: 'vcard-temp'});
@@ -270,7 +270,11 @@ var XMPP = {
         var type = vCard.find('TYPE').text();
         var img_src = 'data:'+type+';base64,'+img;
         sessionStorage.setItem(id, img_src);
-        var elem = $('<span class="left"><img width="30" height="30" src="' + img_src + '"></span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span>');
+        if (! img) {
+            var elem = $('<span class="left"><img width="30" height="30" src="img/placeholder.png"></span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span>');
+        } else {
+            var elem = $('<span class="left"><img width="30" height="30" src="' + img_src + '"></span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span>');
+        }
         $('#' + id).prepend(elem);
         $('.drag').draggable({
                                  helper: "clone",
@@ -606,17 +610,17 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
-    $('#login-button').click(function() {
+    //$('#login-button').click(function() {
         $('#login-screen').hide();
         $('#login-spinner').fadeIn();
         $.getScript(XMPP.CONFIG_FILE, function(){
             $(document).trigger('connect', {
-                jid: $('#jid').val(),
-                password: $('#password').val(),
-                //jid: XMPPConfig.jid,
-                //password: XMPPConfig.password,
+                //jid: $('#jid').val(),
+                //password: $('#password').val(),
+                jid: XMPPConfig.jid,
+                password: XMPPConfig.password,
                 pubsubservice: XMPPConfig.pubsubservice
             });
         })
-    })
+    //})
 });
