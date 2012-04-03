@@ -338,7 +338,7 @@ var XMPP = {
                 var id = XMPP.jid_to_id(jid);
                 var name = XMPP.roster[jid];
                 var avatar = sessionStorage.getItem(id);
-                var elem = $('<div jid="' + jid + '" id="' + id + '"><span class="avatar left"><img width="30" height="30" src="' + avatar + '"></span><span style="margin-left:10px;padding-top:5px;">' + name + '</span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
+                var elem = $('<div jid="' + jid + '" id="' + id + '" class="contact"><span class="avatar left"><img width="30" height="30" src="' + avatar + '"></span><span style="margin-left:10px;padding-top:5px;">' + name + '</span><span class="right hide" id="remove_from_whitelist"><i class="icon-trash icon-white"></i></span><br><span class="quiet" style="margin-left:10px;">' + jid + '</span></div>');
                 $('#roster2').append(elem);
                 $(elem).mouseenter(function() {
                     $(elem).find('#remove_from_whitelist').show()
@@ -485,7 +485,7 @@ $(document).bind('node_update_subscriber_count', function(event, data) {
 $(document).bind('node_info', function(event, data) {
     $('#roster').hide();
     $('#roster2').empty().show();
-    $('#roster2').append('<div><b style="color:#fff">' + XMPP.nodes[data.id] + '</b><span style="float:right;"><a href="#" id="delete_node"><i class="icon-trash icon-white"></i></a>&nbsp;<a href="#" id="close_node"><i class="icon-remove-circle icon-white"></i></a></span><br><span class="quiet">Members</span></div>');
+    //$('#roster2').append('<div><b style="color:#fff">' + XMPP.nodes[data.id] + '</b><span style="float:right;"><a href="#" id="delete_node"><i class="icon-trash icon-white"></i></a>&nbsp;<a href="#" id="close_node"><i class="icon-remove-circle icon-white"></i></a></span><br><span class="quiet">Members</span></div>');
     var nodeAffiliationIQ = $iq({to: XMPP.pubsubservice, type: 'get'})
         .c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub#owner'})
         .c('affiliations', {node: data.id});
@@ -610,17 +610,17 @@ $(document).ready(function() {
         $(document).trigger('notification_tab');
     });
 
-    $('#login-button').click(function() {
+    //$('#login-button').click(function() {
         $('#login-screen').hide();
         $('#login-spinner').fadeIn();
         $.getScript(XMPP.CONFIG_FILE, function(){
             $(document).trigger('connect', {
-                jid: $('#jid').val(),
-                password: $('#password').val(),
-                //jid: XMPPConfig.jid,
-                //password: XMPPConfig.password,
+                //jid: $('#jid').val(),
+                //password: $('#password').val(),
+                jid: XMPPConfig.jid,
+                password: XMPPConfig.password,
                 pubsubservice: XMPPConfig.pubsubservice
             });
         })
-    })
+    //})
 });

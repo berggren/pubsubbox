@@ -37,19 +37,6 @@ body {
     margin:5px;
 }
 
-#roster2 div {
-    height: 30px;
-    display: block;
-    color: #CCC;
-    text-decoration: none;
-    padding: 10px 10px;
-    border-bottom: groove 2px #555;
-    text-shadow: 1px 1px #222;
-    -moz-text-shadow: 1px 1px #222;
-    -webkit-text-shadow: 1px 1px #222;
-    background: #333;
-}
-
 .roster-menu-item {
     height: 10px;
     display: block;
